@@ -1,7 +1,7 @@
 "use strict";
 
 const defaultOptions = {
-    enableHeadingId: true,
+    enableHeadingId: true, //SA what to do if TOC is detected? 
     includeLevel: [1, 2, 3, 4, 5, 6],
     tocContainerClass: "toc",
     tocRegex: "^\\[\\]\\(toc\\)",
@@ -62,18 +62,18 @@ module.exports = function (md, userOptions) {
     const tocFunctionNames = { open: "tocOpen", close: "tocClose", body: "tocBody" };
     const ruleName = "toc"; // works with null, but let's care about other plug-ins
 
-    md.renderer.rules.heading_open = function (tokens, index, something, somethingelse, self) {
+    md.renderer.rules.heading_open = function (tokens, index, userOptions, object, renderer) {
         tokens[index].attrs = tokens[index].attrs || [];
         let title = tokens[index + 1].children.reduce(function (accumulator, child) {
             return accumulator + child.content;
         }, "");
-        const slug = idSet[idCounts.headings];
-        tokens[index].attrs.push(["id", slug]);
+        const headingSlug = idSet[idCounts.headings];
+        tokens[index].attrs.push(["id", headingSlug]);
         ++idCounts.headings;
         if (originalHeadingOpen)
             return originalHeadingOpen.apply(this, arguments);
         else
-            return self.renderToken.apply(self, arguments);
+            return renderer.renderToken.apply(renderer, arguments);
         //SA!!! APPEND text to return to add prefix to heading content
     }; //md.renderer.rules.heading_open
 
@@ -126,9 +126,9 @@ module.exports = function (md, userOptions) {
                 currentLevel = level; // We init with the first found level
             //SA!!! currentLevel is the level of the TOC item, number of '#' in '#', '##', '###'...
             // APPEND text after "<li><a href=\"#%s\">" to make PREFIX to title
-            const slug = idSet[idCounts.toc];
+            const tocSlug = idSet[idCounts.toc];
             ++idCounts.toc;
-            buffer = util.format("<li><a href=\"#%s\">", slug);
+            buffer = util.format("<li><a href=\"#%s\">", tocSlug);
             let headingContent = heading.content;
             if (options.itemPrefixes)
                 if (options.itemPrefixes[currentLevel - 1])
@@ -166,8 +166,7 @@ module.exports = function (md, userOptions) {
             const token = tokens[index];
             const previousToken = tokens[index - 1];
             if (token.type !== "heading_close" || previousToken.type !== "inline") continue;
-            const slug = slugify(previousToken.content, usedIDs);
-            idSet.push(slug);
+            idSet.push(slugify(previousToken.content, usedIDs));
         } //loop
     } //buildIdSet
 

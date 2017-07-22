@@ -12,3 +12,16 @@ Isn't that confusing: what markdown-it plugins for generation of TOC and heading
 - Customizable CSS class of TOC's parent `div` element
 
 ## Options
+
+```
+    includeLevel: [1, 2, 3, 4, 5, 6],
+    tocContainerClass: "toc"
+    tocRegex: "^\\[\\]\\(toc\\)"
+    excludeFromTocRegex: "\\{\\}\\(notoc\\)"
+    defaultListElement: "ul"
+    listElements: ["ul", "ul", "ul", "ul", "ul", "ul"]
+    defaultListElementAttributeSet: { style: "list-style-type: none;" }
+    listElementAttributeSets: []
+    itemPrefixes: [] // array of strings: prefix depending on level
+    idPrefix: "headings."
+```
