@@ -5,7 +5,7 @@ const defaultOptions = {
     includeLevel: [1, 2, 3, 4, 5, 6],
     tocContainerClass: "toc",
     tocRegex: "^\\[\\]\\(toc\\)",
-    excludeFromTocRegex: "\\{\\}\\(notoc\\)",
+    excludeFromTocRegex: "\\[\\]\\(notoc\\)",
     defaultListElement: "ul",
     listElements: ["ul", "ul", "ul", "ul", "ul", "ul"],
     defaultListElementAttributeSet: { style: "list-style-type: none;" },
@@ -67,10 +67,14 @@ module.exports = function (md, userOptions) {
         while (currentPos < size) {
             let token = tokens[currentPos];
             let heading = tokens[currentPos - 1];
+            if (!heading) { currentPos++; continue; }
             let level = token.tag && parseInt(token.tag.substr(1, 1));
+            let excludeFromToc = false;
+            if (excludeFromTocRegex)
+                excludeFromToc = excludeFromTocRegex.exec(heading.content) != null;
             if (token.type !== "heading_close"
                 || options.includeLevel.indexOf(level) == -1 || heading.type !== "inline"
-                || excludeFromTocRegex.exec(heading.content)) {
+                || excludeFromToc) {
                 currentPos++;
                 continue;
             } //if
