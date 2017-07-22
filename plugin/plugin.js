@@ -46,7 +46,7 @@ module.exports = function (md, userOptions) {
     //         return (++tryNumeric).toString();
     // } //nextNumber
 
-    let tocRegexp = options.tocRegex;
+    let tocRegexp = options.tocRegex; // SA??? to move into narrower context
     if (tocRegexp.constructor != RegExp)
         tocRegexp = new RegExp(options.tocRegex, "m");
     let excludeFromTocRegex = options.excludeFromTocRegex;
@@ -111,10 +111,10 @@ module.exports = function (md, userOptions) {
         } //loop
         buffer += "</li>";
         headings.push(buffer);
-        return listElement(currentLevel, currentPos, options, headings);
+        return listElement(currentLevel, tokens.length, options, headings);
     } //createTocTree
 
-    function listElement(level, currentPos, options, headings) {
+    function listElement(level, index, options, headings) {
         let listTag = options.defaultListElement;
         if (options.listElements)
             if (options.listElements[level - 1])
@@ -128,7 +128,7 @@ module.exports = function (md, userOptions) {
             if (options.listElementAttributeSets.length < 1)
                 for (let index in options.defaultListElementAttributeSet)
                     elementAttributes += util.format(" %s=\"%s\"", index, options.defaultListElementAttributeSet[index]);
-        return [currentPos,
+        return [index,
             util.format("<%s%s>%s</%s>",
                 listTag, elementAttributes, headings.join(""), listTag)];
     } //listElement
