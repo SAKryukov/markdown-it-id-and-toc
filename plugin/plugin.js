@@ -46,18 +46,11 @@ module.exports = function (md, userOptions) {
     //         return (++tryNumeric).toString();
     // } //nextNumber
 
-    let tocRegexp = options.tocRegex; // SA??? to move into narrower context
-    if (tocRegexp.constructor != RegExp)
-        tocRegexp = new RegExp(options.tocRegex, "m");
-    let excludeFromTocRegex = options.excludeFromTocRegex;
-    if (excludeFromTocRegex.constructor != RegExp)
-        excludeFromTocRegex = new RegExp(options.excludeFromTocRegex, "m");
-
     // no magic function names:
     const tocFunctionNames = { open: "tocOpen", close: "tocClose", body: "tocBody" };
     const ruleName = "toc"; // works with null, but let's care about other plug-ins
 
-    function createTocTree(pos, tokens, usedIds, idCounts, idSet) {
+    function createTocTree(pos, tokens, usedIds, idCounts, idSet, excludeFromTocRegex) {
         let headings = [],
             buffer = "",
             currentLevel,
@@ -80,7 +73,7 @@ module.exports = function (md, userOptions) {
             } //if
             if (currentLevel) {
                 if (level > currentLevel) {
-                    subHeadings = createTocTree(currentPos, tokens, usedIds, idCounts, idSet);
+                    subHeadings = createTocTree(currentPos, tokens, usedIds, idCounts, idSet, excludeFromTocRegex);
                     buffer += subHeadings[1];
                     currentPos = subHeadings[0];
                     continue;
@@ -143,12 +136,18 @@ module.exports = function (md, userOptions) {
     } //buildIdSet
 
     md.core.ruler.before("inline", "buildToc", function (state) {
+        let tocRegexp = options.tocRegex;
+        if (tocRegexp.constructor != RegExp)
+            tocRegexp = new RegExp(options.tocRegex, "m");
         // extra global check saves time if there is no match:
         let doToc = false;
         if (tocRegexp) {
             const match = tocRegexp.exec(state.src);
             doToc = match != null;
         } //if
+        let excludeFromTocRegex = options.excludeFromTocRegex;
+        if (excludeFromTocRegex.constructor != RegExp)
+            excludeFromTocRegex = new RegExp(options.excludeFromTocRegex, "m");
         //
         const usedIds = { headings: {}, toc: {} };
         const idCounts = { headings: 0, toc: 0 };
@@ -160,7 +159,7 @@ module.exports = function (md, userOptions) {
                 return util.format("<div class=\"%s\">", options.tocContainerClass);
             }; // open
             md.renderer.rules[tocFunctionNames.body] = function (tokens, index) {
-                return createTocTree(0, state.tokens, usedIds, idCounts, idSet)[1];
+                return createTocTree(0, state.tokens, usedIds, idCounts, idSet, excludeFromTocRegex)[1];
             }; //body
             md.renderer.rules[tocFunctionNames.close] = function (tokens, index) {
                 return "</div>";
