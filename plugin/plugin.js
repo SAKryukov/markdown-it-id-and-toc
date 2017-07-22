@@ -56,21 +56,16 @@ module.exports = function (md, userOptions) {
             currentLevel,
             subHeadings,
             currentPos = pos;
-        const  size = tokens.length;
+        const size = tokens.length;
         while (currentPos < size) {
             const token = tokens[currentPos];
-            const headingIndex = currentPos - 1;
-            const heading = tokens[headingIndex];
+            const heading = tokens[currentPos - 1];
             if (!heading) { currentPos++; continue; }
             const level = token.tag && parseInt(token.tag.substr(1, 1));
-            // SA??? new
-            const excludeFromToc = false;
-            // if (excludeFromTocRegex)
-            //     excludeFromToc = excludeFromTocRegex.exec(heading.content) != null;
             if (token.type !== "heading_close"
                 || options.includeLevel.indexOf(level) == -1
                 || heading.type !== "inline"
-                || excludeFromToc) {
+                || usedIds.excludeFromToc[currentPos] == token) {
                 currentPos++;
                 continue;
             } //if
@@ -134,12 +129,16 @@ module.exports = function (md, userOptions) {
             const token = tokens[index];
             const headingTextToken = tokens[index - 1];
             if (token.type !== "heading_close" || headingTextToken.type !== "inline") continue;
-            idSet.push(slugify(headingTextToken.content, usedIds));
-            if (!excludeFromTocRegex) return;
-            const oldContent = headingTextToken.content;
-            headingTextToken.content = headingTextToken.content.replace(excludeFromTocRegex, "");
-            if (oldContent !== headingTextToken.content)
-                usedIds.excludeFromToc.push(index);
+            let excludeFromToc = false;
+            if (excludeFromTocRegex) {
+                const oldContent = headingTextToken.content;
+                headingTextToken.content = headingTextToken.content.replace(excludeFromTocRegex, "");
+                excludeFromToc = oldContent !== headingTextToken.content; 
+                if (excludeFromToc)
+                    usedIds.excludeFromToc[index] = token;
+            } //if
+            if (!excludeFromToc)
+                idSet.push(slugify(headingTextToken.content, usedIds));
         } //loop
     } //buildIdSet
 
@@ -157,7 +156,7 @@ module.exports = function (md, userOptions) {
         if (excludeFromTocRegex.constructor != RegExp)
             excludeFromTocRegex = new RegExp(options.excludeFromTocRegex, "m");
         //
-        const usedIds = { headings: {}, toc: {}, excludeFromToc: [] };
+        const usedIds = { headings: {}, toc: {}, excludeFromToc: {} };
         const idCounts = { headings: 0, toc: 0 };
         const idSet = [];
         buildIdSet(idSet, state.tokens, excludeFromTocRegex, usedIds);
