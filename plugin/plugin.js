@@ -88,7 +88,7 @@ module.exports = function (md, userOptions) {
                 if (level < currentLevel) {
                     buffer += "</li>";
                     headings.push(buffer);
-                    return listElement(currentLevel, currentPos, options, headings);
+                    return [currentPos, listElement(currentLevel, options, headings)];
                 } //if
                 if (level == currentLevel) {
                     buffer += "</li>";
@@ -111,10 +111,10 @@ module.exports = function (md, userOptions) {
         } //loop
         buffer += "</li>";
         headings.push(buffer);
-        return listElement(currentLevel, tokens.length, options, headings);
+        return [tokens.length, listElement(currentLevel, options, headings)];
     } //createTocTree
 
-    function listElement(level, index, options, headings) {
+    function listElement(level, options, headings) {
         let listTag = options.defaultListElement;
         if (options.listElements)
             if (options.listElements[level - 1])
@@ -127,10 +127,10 @@ module.exports = function (md, userOptions) {
         if (options.listElementAttributeSets)
             if (options.listElementAttributeSets.length < 1)
                 for (let index in options.defaultListElementAttributeSet)
-                    elementAttributes += util.format(" %s=\"%s\"", index, options.defaultListElementAttributeSet[index]);
-        return [index,
-            util.format("<%s%s>%s</%s>",
-                listTag, elementAttributes, headings.join(""), listTag)];
+                    elementAttributes += util.format(" %s=\"%s\"",
+                        index,
+                        options.defaultListElementAttributeSet[index]);
+        return util.format("<%s%s>%s</%s>", listTag, elementAttributes, headings.join(""), listTag);
     } //listElement
 
     function buildIdSet(idSet, tokens, usedIds) {
