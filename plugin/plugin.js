@@ -144,24 +144,28 @@ module.exports = function (md, userOptions) {
 
     md.core.ruler.before("inline", "buildToc", function (state) {
         // extra global check saves time if there is no match:
-        const match = tocRegexp.exec(state.src);
-        if (!match) return;
-        if (match.length < 1) return;
+        let doToc = false;
+        if (tocRegexp) {
+            const match = tocRegexp.exec(state.src);
+            doToc = match != null;
+        } //if
         //
         const usedIds = { headings: {}, toc: {} };
         const idCounts = { headings: 0, toc: 0 };
         const idSet = [];
         buildIdSet(idSet, state.tokens, usedIds);
         // create TOC:
-        md.renderer.rules[tocFunctionNames.open] = function (tokens, index) {
-            return util.format("<div class=\"%s\">", options.tocContainerClass);
-        }; // open
-        md.renderer.rules[tocFunctionNames.body] = function (tokens, index) {
-            return createTocTree(0, state.tokens, usedIds, idCounts, idSet)[1];
-        }; //body
-        md.renderer.rules[tocFunctionNames.close] = function (tokens, index) {
-            return "</div>";
-        }; //close
+        if (doToc) {
+            md.renderer.rules[tocFunctionNames.open] = function (tokens, index) {
+                return util.format("<div class=\"%s\">", options.tocContainerClass);
+            }; // open
+            md.renderer.rules[tocFunctionNames.body] = function (tokens, index) {
+                return createTocTree(0, state.tokens, usedIds, idCounts, idSet)[1];
+            }; //body
+            md.renderer.rules[tocFunctionNames.close] = function (tokens, index) {
+                return "</div>";
+            }; //close
+        } //if doToc
         // add id attributes:
         const headingOpenPrevious = md.renderer.rules.heading_open;
         md.renderer.rules.heading_open = function (tokens, index, userOptions, object, renderer) {
@@ -179,21 +183,22 @@ module.exports = function (md, userOptions) {
             //SA!!! APPEND text to return to add prefix to heading content
         }; //md.renderer.rules.heading_open
         // detect TOC location:
-        md.inline.ruler.before("text", ruleName, function toc(state, silent) {
-            if (silent) return false;
-            const match = tocRegexp.exec(state.src);
-            if (!match) return false;
-            if (match.length < 1) return false;
-            state.push(tocFunctionNames.open, ruleName, 1);
-            state.push(tocFunctionNames.body, ruleName, 0);
-            state.push(tocFunctionNames.close, ruleName, -1);
-            let newline = state.src.indexOf("\n");
-            if (newline !== -1)
-                state.pos = state.pos + newline;
-            else
-                state.pos = state.pos + state.posMax + 1;
-            return true;
-        });
+        if (doToc)
+            md.inline.ruler.before("text", ruleName, function toc(state, silent) {
+                if (silent) return false;
+                const match = tocRegexp.exec(state.src);
+                if (!match) return false;
+                if (match.length < 1) return false;
+                state.push(tocFunctionNames.open, ruleName, 1);
+                state.push(tocFunctionNames.body, ruleName, 0);
+                state.push(tocFunctionNames.close, ruleName, -1);
+                let newline = state.src.indexOf("\n");
+                if (newline !== -1)
+                    state.pos = state.pos + newline;
+                else
+                    state.pos = state.pos + state.posMax + 1;
+                return true;
+            });
     }); //md.core.ruler.before
 
 }; //module.exports
