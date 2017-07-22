@@ -53,43 +53,11 @@ module.exports = function (md, userOptions) {
     if (excludeFromTocRegex.constructor != RegExp)
         excludeFromTocRegex = new RegExp(options.excludeFromTocRegex, "m");
 
-    const usedIDs = { headings: {}, toc: {} };
-    const idCounts = { headings: 0, toc: 0 };
-    const idSet = [];
-    const originalHeadingOpen = md.renderer.rules.heading_open;
-    let fullTokenSet;
     // no magic function names:
     const tocFunctionNames = { open: "tocOpen", close: "tocClose", body: "tocBody" };
     const ruleName = "toc"; // works with null, but let's care about other plug-ins
 
-    md.renderer.rules.heading_open = function (tokens, index, userOptions, object, renderer) {
-        tokens[index].attrs = tokens[index].attrs || [];
-        let title = tokens[index + 1].children.reduce(function (accumulator, child) {
-            return accumulator + child.content;
-        }, "");
-        const headingSlug = idSet[idCounts.headings];
-        tokens[index].attrs.push(["id", headingSlug]);
-        ++idCounts.headings;
-        if (originalHeadingOpen)
-            return originalHeadingOpen.apply(this, arguments);
-        else
-            return renderer.renderToken.apply(renderer, arguments);
-        //SA!!! APPEND text to return to add prefix to heading content
-    }; //md.renderer.rules.heading_open
-
-    let r = md.renderer.rules[tocFunctionNames.open] = function (tokens, index) {
-        usedIDs.toc = {};
-        return util.format("<div class=\"%s\">", options.tocContainerClass);
-    }; // open
-    md.renderer.rules[tocFunctionNames.body] = function (tokens, index) {
-        return createTocTree(0, fullTokenSet)[1];
-    }; //body
-    md.renderer.rules[tocFunctionNames.close] = function (tokens, index) {
-        return "</div>";
-        usedIDs.toc = {};
-    }; //close
-
-    function createTocTree(pos, tokens) {
+    function createTocTree(pos, tokens, usedIds, idCounts, idSet) {
         let headings = [],
             buffer = "",
             currentLevel,
@@ -108,7 +76,7 @@ module.exports = function (md, userOptions) {
             } //if
             if (currentLevel) {
                 if (level > currentLevel) {
-                    subHeadings = createTocTree(currentPos, tokens);
+                    subHeadings = createTocTree(currentPos, tokens, usedIds, idCounts, idSet);
                     buffer += subHeadings[1];
                     currentPos = subHeadings[0];
                     continue;
@@ -161,27 +129,53 @@ module.exports = function (md, userOptions) {
                 listTag, elementAttributes, headings.join(""), listTag)];
     } //listElement
 
-    function buildIdSet(idSet, tokens) {
+    function buildIdSet(idSet, tokens, usedIds) {
         for (let index = 1; index < tokens.length; ++index) {
             const token = tokens[index];
             const previousToken = tokens[index - 1];
             if (token.type !== "heading_close" || previousToken.type !== "inline") continue;
-            idSet.push(slugify(previousToken.content, usedIDs));
+            idSet.push(slugify(previousToken.content, usedIds));
         } //loop
     } //buildIdSet
 
     md.core.ruler.before("inline", "buildToc", function (state) {
-        usedIDs.headings = [];
         if (!tocRegexp) return;
         // extra global check saves time if there is no match:
         const match = tocRegexp.exec(state.src);
         if (!match) return;
         if (match.length < 1) return;
-        usedIDs.headings = {};
-        usedIDs.toc = {};
-        buildIdSet(idSet, state.tokens);
-        idCounts.headings = 0;
-        idCounts.top = 0;
+        //
+        const usedIds = { headings: {}, toc: {} };
+        const idCounts = { headings: 0, toc: 0 };
+        const idSet = [];
+        buildIdSet(idSet, state.tokens, usedIds);
+        //
+        md.renderer.rules[tocFunctionNames.open] = function (tokens, index) {
+            return util.format("<div class=\"%s\">", options.tocContainerClass);
+        }; // open
+        md.renderer.rules[tocFunctionNames.body] = function (tokens, index) {
+            return createTocTree(0, state.tokens, usedIds, idCounts, idSet)[1];
+        }; //body
+        md.renderer.rules[tocFunctionNames.close] = function (tokens, index) {
+            return "</div>";
+        }; //close
+        //
+        const headingOpenPrevious = md.renderer.rules.heading_open;
+        md.renderer.rules.heading_open = function (tokens, index, userOptions, object, renderer) {
+            tokens[index].attrs = tokens[index].attrs || [];
+            let title = tokens[index + 1].children.reduce(function (accumulator, child) {
+                return accumulator + child.content;
+            }, "");
+            const headingSlug = idSet[idCounts.headings];
+            tokens[index].attrs.push(["id", headingSlug]);
+            ++idCounts.headings;
+            if (headingOpenPrevious)
+                return headingOpenPrevious.apply(this, arguments);
+            else
+                return renderer.renderToken.apply(renderer, arguments);
+            //SA!!! APPEND text to return to add prefix to heading content
+        }; //md.renderer.rules.heading_open
+        //
         md.inline.ruler.before("text", ruleName, function toc(state, silent) {
             if (silent) return false;
             const match = tocRegexp.exec(state.src);
@@ -197,7 +191,6 @@ module.exports = function (md, userOptions) {
                 state.pos = state.pos + state.posMax + 1;
             return true;
         });
-        fullTokenSet = state.tokens;
     }); //md.core.ruler.before
 
 }; //module.exports
