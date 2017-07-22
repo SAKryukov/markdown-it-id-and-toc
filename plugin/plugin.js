@@ -139,7 +139,6 @@ module.exports = function (md, userOptions) {
     } //buildIdSet
 
     md.core.ruler.before("inline", "buildToc", function (state) {
-        if (!tocRegexp) return;
         // extra global check saves time if there is no match:
         const match = tocRegexp.exec(state.src);
         if (!match) return;
@@ -149,7 +148,7 @@ module.exports = function (md, userOptions) {
         const idCounts = { headings: 0, toc: 0 };
         const idSet = [];
         buildIdSet(idSet, state.tokens, usedIds);
-        //
+        // create TOC:
         md.renderer.rules[tocFunctionNames.open] = function (tokens, index) {
             return util.format("<div class=\"%s\">", options.tocContainerClass);
         }; // open
@@ -159,7 +158,7 @@ module.exports = function (md, userOptions) {
         md.renderer.rules[tocFunctionNames.close] = function (tokens, index) {
             return "</div>";
         }; //close
-        //
+        // add id attributes:
         const headingOpenPrevious = md.renderer.rules.heading_open;
         md.renderer.rules.heading_open = function (tokens, index, userOptions, object, renderer) {
             tokens[index].attrs = tokens[index].attrs || [];
@@ -175,7 +174,7 @@ module.exports = function (md, userOptions) {
                 return renderer.renderToken.apply(renderer, arguments);
             //SA!!! APPEND text to return to add prefix to heading content
         }; //md.renderer.rules.heading_open
-        //
+        // detect TOC location:
         md.inline.ruler.before("text", ruleName, function toc(state, silent) {
             if (silent) return false;
             const match = tocRegexp.exec(state.src);
