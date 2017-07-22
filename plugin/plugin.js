@@ -55,15 +55,16 @@ module.exports = function (md, userOptions) {
             buffer = "",
             currentLevel,
             subHeadings,
-            size = tokens.length,
             currentPos = pos;
+        const  size = tokens.length;
         while (currentPos < size) {
-            let token = tokens[currentPos];
-            let heading = tokens[currentPos - 1];
+            const token = tokens[currentPos];
+            const headingIndex = currentPos - 1;
+            const heading = tokens[headingIndex];
             if (!heading) { currentPos++; continue; }
-            let level = token.tag && parseInt(token.tag.substr(1, 1));
+            const level = token.tag && parseInt(token.tag.substr(1, 1));
             // SA??? new
-            let excludeFromToc = false;
+            const excludeFromToc = false;
             // if (excludeFromTocRegex)
             //     excludeFromToc = excludeFromTocRegex.exec(heading.content) != null;
             if (token.type !== "heading_close"
