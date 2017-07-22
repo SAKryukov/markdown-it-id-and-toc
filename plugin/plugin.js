@@ -1,7 +1,7 @@
 "use strict";
 
 const defaultOptions = {
-    enableHeadingId: true, //SA what to do if TOC is detected? 
+    enableHeadingId: false,
     includeLevel: [1, 2, 3, 4, 5, 6],
     tocContainerClass: "toc",
     tocRegex: "^\\[\\]\\(toc\\)",
@@ -133,7 +133,7 @@ module.exports = function (md, userOptions) {
             if (excludeFromTocRegex) {
                 const oldContent = headingTextToken.content;
                 headingTextToken.content = headingTextToken.content.replace(excludeFromTocRegex, "");
-                excludeFromToc = oldContent !== headingTextToken.content; 
+                excludeFromToc = oldContent !== headingTextToken.content;
                 if (excludeFromToc)
                     usedIds.excludeFromToc[index] = token;
             } //if
@@ -143,6 +143,8 @@ module.exports = function (md, userOptions) {
     } //buildIdSet
 
     md.core.ruler.before("inline", "buildToc", function (state) {
+        if (!options.enableHeadingId)   // inconsistent with having toc/no-toc tags, 
+            return;                     // so leave them as is
         let tocRegexp = options.tocRegex;
         if (tocRegexp.constructor != RegExp)
             tocRegexp = new RegExp(options.tocRegex, "m");
