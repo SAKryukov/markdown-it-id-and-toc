@@ -82,13 +82,18 @@ module.exports = function (md, userOptions) {
             const token = tokens[index];
             const headingTextToken = tokens[index - 1];
             if (token.type !== "heading_close" || headingTextToken.type !== "inline") continue;
-            idSet.push(slugify(headingTextToken.content, usedIds));
+            let excludeFromToc = false;
             if (excludeFromTocRegex) {
                 const oldContent = headingTextToken.content;
                 headingTextToken.content = headingTextToken.content.replace(excludeFromTocRegex, "");
-                if (oldContent !== headingTextToken.content)
+                excludeFromToc = oldContent !== headingTextToken.content; 
+                if (excludeFromToc)
                     usedIds.excludeFromToc[index] = token;
             } //if
+            idSet.push({
+                id: slugify(headingTextToken.content, usedIds),
+                prefix: ""
+            });
         } //loop
     } //buildIdSet
 
@@ -99,13 +104,14 @@ module.exports = function (md, userOptions) {
             let title = tokens[index + 1].children.reduce(function (accumulator, child) {
                 return accumulator + child.content;
             }, "");
-            const headingSlug = idSet[idCounts.headings];
+            const headingSlug = idSet[idCounts.headings].id;
             tokens[index].attrs.push(["id", headingSlug]);
+            const prefix = idSet[idCounts.headings].prefix;
             ++idCounts.headings;
             if (headingOpenPrevious)
-                return headingOpenPrevious.apply(this, arguments);
+                return headingOpenPrevious.apply(this, arguments) + prefix;
             else
-                return renderer.renderToken.apply(renderer, arguments);
+                return renderer.renderToken.apply(renderer, arguments) + prefix;
             //SA!!! APPEND text to return to add prefix to heading content
         }; //md.renderer.rules.heading_open
     } //addIdAttributes
@@ -175,12 +181,10 @@ module.exports = function (md, userOptions) {
                 } //if
             } else
                 currentLevel = level; // We init with the first found level
-            //SA!!! currentLevel is the level of the TOC item, number of '#' in '#', '##', '###'...
-            // APPEND text after "<li><a href=\"#%s\">" to make PREFIX to title
-            const tocSlug = idSet[idCounts.toc];
+            const tocSlug = idSet[idCounts.toc].id;
+            let headingContent = idSet[idCounts.toc].prefix + heading.content;
             ++idCounts.toc;
             listItemContent = util.format("<li><a href=\"#%s\">", tocSlug);
-            let headingContent = heading.content;
             if (options.itemPrefixes)
                 if (options.itemPrefixes[currentLevel - 1])
                     headingContent = options.itemPrefixes[currentLevel - 1] + headingContent;
