@@ -13,7 +13,7 @@
     "Other"
   ],
   "engines": {
-    "node": "^7.4.0"
+    "node": ">=7.4.0"
   },
   "keywords": [
     "markdown",
@@ -24,6 +24,9 @@
     "url": "https://github.com/SAKryukov/markdown-it-id-and-toc/issues"
   },
   "homepage": "https://github.com/SAKryukov/markdown-it-id-and-toc#readme",
+  "peerDependencies": {
+    "markdown-it": ">=8.2.2"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   }
