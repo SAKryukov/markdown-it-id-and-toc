@@ -136,42 +136,42 @@ module.exports = function (md, userOptions) {
         });
     } //detectAndPushToc
 
-    function createTocTree(pos, tokens, usedIds, idCounts, idSet) {
+    function createTocTree(tokenIndex, tokens, usedIds, idCounts, idSet) {
         let headings = [],
-            buffer = "",
+            listItemContent = "",
             currentLevel,
             subHeadings,
-            currentPos = pos;
+            currentTokenIndex = tokenIndex;
         const size = tokens.length;
-        while (currentPos < size) {
-            const token = tokens[currentPos];
-            const heading = tokens[currentPos - 1];
-            if (!heading) { currentPos++; continue; }
+        while (currentTokenIndex < size) {
+            const token = tokens[currentTokenIndex];
+            const heading = tokens[currentTokenIndex - 1];
+            if (!heading) { currentTokenIndex++; continue; }
             const level = token.tag && parseInt(token.tag.substr(1, 1));
             if (token.type !== "heading_close" || heading.type !== "inline") {
-                currentPos++;
+                currentTokenIndex++;
                 continue;
             } //if
-            if (usedIds.excludeFromToc[currentPos] == token || options.includeLevel.indexOf(level) == -1) {
-                currentPos++;
+            if (usedIds.excludeFromToc[currentTokenIndex] == token || options.includeLevel.indexOf(level) == -1) {
+                currentTokenIndex++;
                 ++idCounts.toc; // one id is skipped
                 continue;
             } //if
             if (currentLevel) {
                 if (level > currentLevel) {
-                    subHeadings = createTocTree(currentPos, tokens, usedIds, idCounts, idSet);
-                    buffer += subHeadings[1];
-                    currentPos = subHeadings[0];
+                    subHeadings = createTocTree(currentTokenIndex, tokens, usedIds, idCounts, idSet);
+                    listItemContent += subHeadings[1];
+                    currentTokenIndex = subHeadings[0];
                     continue;
                 } //if
                 if (level < currentLevel) {
-                    buffer += "</li>";
-                    headings.push(buffer);
-                    return [currentPos, listElement(currentLevel, options, headings)];
+                    listItemContent += "</li>";
+                    headings.push(listItemContent);
+                    return [currentTokenIndex, listElement(currentLevel, options, headings)];
                 } //if
                 if (level == currentLevel) {
-                    buffer += "</li>";
-                    headings.push(buffer);
+                    listItemContent += "</li>";
+                    headings.push(listItemContent);
                 } //if
             } else
                 currentLevel = level; // We init with the first found level
@@ -179,17 +179,17 @@ module.exports = function (md, userOptions) {
             // APPEND text after "<li><a href=\"#%s\">" to make PREFIX to title
             const tocSlug = idSet[idCounts.toc];
             ++idCounts.toc;
-            buffer = util.format("<li><a href=\"#%s\">", tocSlug);
+            listItemContent = util.format("<li><a href=\"#%s\">", tocSlug);
             let headingContent = heading.content;
             if (options.itemPrefixes)
                 if (options.itemPrefixes[currentLevel - 1])
                     headingContent = options.itemPrefixes[currentLevel - 1] + headingContent;
-            buffer += typeof options.format === "function" ? options.format(headingContent) : headingContent;
-            buffer += "</a>";
-            currentPos++;
+            listItemContent += typeof options.format === "function" ? options.format(headingContent) : headingContent;
+            listItemContent += "</a>";
+            currentTokenIndex++;
         } //loop
-        buffer += "</li>";
-        headings.push(buffer);
+        listItemContent += "</li>";
+        headings.push(listItemContent);
         return [tokens.length, listElement(currentLevel, options, headings)];
     } //createTocTree
 
