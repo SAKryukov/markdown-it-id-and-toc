@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 2.0.3
+
+* Code refactoring for better readability
+
 ## Version 2.0.2
 
 * First production release to npm
