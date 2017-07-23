@@ -2,7 +2,7 @@
     "name": "markdown-it-id-and-toc",
     "description": "Markdown-it plug-in unifies creation of TOC and heading id values, supports id uniqueness and referential integrity",
     "main": "./plugin/plugin.js",
-    "version": "2.0.0",
+    "version": "2.0.2",
     "repository": {
         "type": "git",
         "url": "https://github.com/SAKryukov/markdown-it-id-and-toc"
@@ -22,8 +22,5 @@
         "markdown",
         "markdown-it",
         "plugin"
-    ],
-    "peerDependencies": {
-        "markdown-it": "^7.4.0"
-    }
+    ]
 }
