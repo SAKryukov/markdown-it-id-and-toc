@@ -1,26 +1,30 @@
 {
-    "name": "markdown-it-id-and-toc",
-    "description": "Markdown-it plug-in unifies creation of TOC and heading id values, supports id uniqueness and referential integrity",
-    "main": "./plugin/plugin.js",
-    "version": "2.0.2",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/SAKryukov/markdown-it-id-and-toc"
-    },
-    "author": {
-        "name": "Sergey A Kryukov",
-        "url": "http://www.SAKryukov.org"
-    },
-    "license": "MIT",
-    "categories": [
-        "Other"
-    ],
-    "engines": {
-        "node": "^7.4.0"
-    },
-    "keywords": [
-        "markdown",
-        "markdown-it",
-        "plugin"
-    ]
+  "name": "markdown-it-id-and-toc",
+  "description": "Markdown-it plug-in unifies creation of TOC and heading id values, supports id uniqueness and referential integrity",
+  "main": "./plugin/plugin.js",
+  "version": "2.0.2",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SAKryukov/markdown-it-id-and-toc.git"
+  },
+  "author": "Sergey A Kryukov (http://www.SAKryukov.org)",
+  "license": "MIT",
+  "categories": [
+    "Other"
+  ],
+  "engines": {
+    "node": "^7.4.0"
+  },
+  "keywords": [
+    "markdown",
+    "markdown-it",
+    "plugin"
+  ],
+  "bugs": {
+    "url": "https://github.com/SAKryukov/markdown-it-id-and-toc/issues"
+  },
+  "homepage": "https://github.com/SAKryukov/markdown-it-id-and-toc#readme",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
 }
