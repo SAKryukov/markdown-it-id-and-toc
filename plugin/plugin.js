@@ -7,13 +7,13 @@ const defaultOptions = {
         { prefix: "Chapter ", start: 1 },
         {},
         { start: 1, separator: '.', dropInherited: true }, // make a better name for drop*...
-        { separator: '-'}
+        { separator: '-' }
     ],
     autoNumberingSuffix: ". ",
     defaultAutoNumberingPrefix: '',
     defaultAutoAutoNumberingStart: 1,
     defaultAutoNumberingSeparator: '.',
-    autoNumberingRegex: "\\[\\]\\(numbering(*.?)\\)",
+    autoNumberingRegex: "\\[\\]\\(numbering(.*?)\\)",
     includeLevel: [2, 4, 5, 6],
     tocContainerClass: "toc",
     tocRegex: "^\\[\\]\\(toc\\)",
@@ -94,7 +94,7 @@ module.exports = function (md, userOptions) {
         function getOption(level, property, defaultValue) {
             if (!defaultValue) defaultValue = '';
             if (!options.autoNumberingPattern) return defaultValue;
-            const arrayElement = options.autoNumberingPattern[level - 1]; 
+            const arrayElement = options.autoNumberingPattern[level - 1];
             if (!arrayElement) return defaultValue;
             const propertyValue = arrayElement[property];
             if (!propertyValue) return defaultValue;
@@ -109,10 +109,26 @@ module.exports = function (md, userOptions) {
         function getPrefix(level) {
             return getOption(level, "prefix", options.defaultAutoAutoNumberingPrefix);
         } //getStart
-        const initializeAutoNumbering = function() {
+        function getDocumentLevelOptions(tokens) {
+            if (tokens.length < 3) return;
+            if (!options.autoNumberingRegex) return;
+            if (tokens[0].type != "paragraph_open" || tokens[1].type != "inline" || tokens[2].type != "paragraph_close")
+                return;
+            const regexp = new RegExp(options.autoNumberingRegex, "gm");
+            const content = tokens[1].content.replace("\n", "").replace("\r", "");
+            const match = regexp.exec(content);
+            if (!match) return;
+            if (!match.length) return;
+            if (match.length < 2) return;
+            tokens.splice(0, 3);
+            return JSON.parse(match[1]);
+        } //getDocumentLevelOptions
+        const initializeAutoNumbering = function (tokens) {
+            const documentOptions = getDocumentLevelOptions(tokens);
             return {
                 level: -1,
-                levels: []
+                levels: [],
+                documentOptions: documentOptions ? documentOptions : options.autoNumberingPattern
             };
         }; //initializeAutoNumbering
         const iterateAutoNumbering = function (excludeFromToc, autoSet, token) {
@@ -148,16 +164,14 @@ module.exports = function (md, userOptions) {
                     : autoSet.levels[level].number + options.autoNumberingSuffix;
             const prefix = getPrefix(level);
             autoSet.level = level;
-            return  prefix + result;
+            return prefix + result;
         }; //iterateAutoNumbering
         return { initializer: initializeAutoNumbering, iterator: iterateAutoNumbering };
     } //autoNumbering
 
     function buildIdSet(idSet, tokens, excludeFromTocRegex, usedIds) {
         const autoNumberingMethods = autoNumbering();
-        // auto-numbers:
-        const autoSet = autoNumberingMethods.initializer();
-        // end auto-numbers
+        const autoSet = autoNumberingMethods.initializer(tokens);
         let lastLevel
         for (let index = 1; index < tokens.length; ++index) {
             const token = tokens[index];
