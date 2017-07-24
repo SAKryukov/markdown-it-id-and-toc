@@ -13,7 +13,7 @@ const defaultOptions = {
     defaultAutoNumberingPrefix: '',
     defaultAutoAutoNumberingStart: 1,
     defaultAutoNumberingSeparator: '.',
-    autoNumberingRegex: "\\[\\]\\(numbering(.*?)\\)",
+    autoNumberingRegex: "\\[\\]\\(numbering([\\s\\S]*?)\\)",
     includeLevel: [2, 4, 5, 6],
     tocContainerClass: "toc",
     tocRegex: "^\\[\\]\\(toc\\)",
@@ -114,9 +114,8 @@ module.exports = function (md, userOptions) {
             if (!options.autoNumberingRegex) return;
             if (tokens[0].type != "paragraph_open" || tokens[1].type != "inline" || tokens[2].type != "paragraph_close")
                 return;
-            const regexp = new RegExp(options.autoNumberingRegex, "gm");
-            const content = tokens[1].content.replace("\n", "").replace("\r", "");
-            const match = regexp.exec(content);
+            const regexp = new RegExp(options.autoNumberingRegex);
+            const match = regexp.exec(tokens[1].content);
             if (!match) return;
             if (!match.length) return;
             if (match.length < 2) return;
