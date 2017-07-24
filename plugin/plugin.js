@@ -7,15 +7,15 @@ const defaultOptions = {
             { start: 1 },
             { prefix: "Part ", start: 1 },
             {},
-            { start: 1, separator: '.', standAlong: true },
+            { start: 1, separator: '-', standAlong: true },
             { separator: '.' }
         ],
-        suffix: ". ",
         defaultPrefix: '',
+        defaultSuffix: ". ",
         defaultStart: 1,
         defaultSeparator: '.',
     },
-    autoNumberingRegex: "\\[\\]\\(numbering([\\s\\S]*?)\\)",
+    autoNumberingRegex: "\\[\\]\\(\\=numbering([\\s\\S]*?)\\=\\)",
     includeLevel: [2, 4, 5, 6],
     tocContainerClass: "toc",
     tocRegex: "^\\[\\]\\(toc\\)",
@@ -134,7 +134,10 @@ module.exports = function (md, userOptions) {
                     return getOption(effectiveOptions, level, "prefix", effectiveOptions.defaultPrefix);
                 },
                 getSuffix: function (level) {
-                    return effectiveOptions.suffix;
+                    return getOption(effectiveOptions, level, "suffix", effectiveOptions.defaultSuffix);
+                },                
+                getStandAlong: function (level) {
+                    return getOption(effectiveOptions, level, "standAlong", effectiveOptions.defaultPrefix);
                 }
             }; //theSet
             theSet.getAccumulator = function (level) {
@@ -146,7 +149,8 @@ module.exports = function (md, userOptions) {
                     + theSet.levels[theSet.level].number
             }; //theSet.getAccumulator
             theSet.getNumberingText = function (level) {
-                return theSet.levels[level].accumulator.length > 0 ?
+                const standAlong = theSet.getStandAlong(level); 
+                return (!standAlong) && theSet.levels[level].accumulator.length > 0 ?
                     theSet.levels[level].accumulator
                     + theSet.getSeparator(level)
                     + theSet.levels[level].number.toString()
