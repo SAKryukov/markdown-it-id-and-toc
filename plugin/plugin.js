@@ -4,10 +4,14 @@ const defaultOptions = {
     enableHeadingId: true,
     autoNumberingPattern: [
         { start: 1 },
-        { start: 1 },
-        ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii', 'ix', 'x', 'xi', 'xii'],
-        { start: 1, accumulate: 6 },
+        { prefix: "Chapter ", start: 1 },
+        {},
+        { start: 1, dropInherited: true }, // make a better name for drop*...
     ],
+    autoNumberingSuffix: ". ",
+    defaultAutoNumberingPrefix: '',
+    defaultAutoAutoNumberingStart: 1,
+    autoNumberingRegex: "\\[\\]\\(numbering(*.?)\\)",
     includeLevel: [2, 4, 5, 6],
     tocContainerClass: "toc",
     tocRegex: "^\\[\\]\\(toc\\)",
@@ -16,7 +20,6 @@ const defaultOptions = {
     listElements: ["ul", "ul", "ul", "ul", "ul", "ul"],
     defaultListElementAttributeSet: { style: "list-style-type: none;" },
     listElementAttributeSets: [],
-    itemPrefixes: [], // array of strings: prefix depending on level
     idPrefix: "headings.",
     format: undefined
 }; //defaultOptions
@@ -91,8 +94,10 @@ module.exports = function (md, userOptions) {
             levels: []
         };
     } //initializeAutoNumbering
+    function getAutoNumberingOption() {
+    } //getAutoNumberingOption
     function iterateAutoNumbering(excludeFromToc, autoSet, token) {
-        const accumulatorDelimiters = ["-1-", "-2-", "-3-", "-4-", ".", "-", "-7-", ];
+        const accumulatorDelimiters = ["-1-", "-2-", "-3-", "-4-", ".", "-", "-7-",];
         if (!options.autoNumberingPattern)
             return '';
         const initialNumber = '1'; //SA??? for now
@@ -113,9 +118,13 @@ module.exports = function (md, userOptions) {
         } else
             autoSet.levels[level].number = nextNumber(autoSet.levels[level].number);
         const result =
-            autoSet.levels[level].accumulator.length > 0 ? 
-                util.format("%s%s%s ", autoSet.levels[level].accumulator, accumulatorDelimiters[level], autoSet.levels[level].number)
-                : autoSet.levels[level].number + ' ';
+            autoSet.levels[level].accumulator.length > 0 ?
+                util.format(
+                    "%s%s%s%s", autoSet.levels[level].accumulator,
+                    accumulatorDelimiters[level],
+                    autoSet.levels[level].number,
+                    options.autoNumberingSuffix)
+                : autoSet.levels[level].number + options.autoNumberingSuffix;
         autoSet.level = level;
         return result;
     } //iterateAutoNumbering
@@ -229,13 +238,13 @@ module.exports = function (md, userOptions) {
             } else
                 currentLevel = level; // We init with the first found level
             const tocSlug = idSet[idCounts.toc].id;
-            let headingContent = idSet[idCounts.toc].prefix + heading.content;
+            const prefix = idSet[idCounts.toc].prefix;
             ++idCounts.toc;
-            listItemContent = util.format("<li><a href=\"#%s\">", tocSlug);
+            listItemContent = util.format("<li>%s<a href=\"#%s\">", prefix, tocSlug);
             if (options.itemPrefixes)
                 if (options.itemPrefixes[currentLevel - 1])
                     headingContent = options.itemPrefixes[currentLevel - 1] + headingContent;
-            listItemContent += typeof options.format === "function" ? options.format(headingContent) : headingContent;
+            listItemContent += typeof options.format === "function" ? options.format(heading.content) : heading.content;
             listItemContent += "</a>";
             currentTokenIndex++;
         } //loop
