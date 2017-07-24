@@ -88,50 +88,52 @@ module.exports = function (md, userOptions) {
             return (++tryNumeric).toString();
     } //nextNumber    
 
-    function initializeAutoNumbering() {
-        return {
-            level: -1,
-            levels: []
-        };
-    } //initializeAutoNumbering
-    function getAutoNumberingOption() {
-    } //getAutoNumberingOption
-    function iterateAutoNumbering(excludeFromToc, autoSet, token) {
-        const accumulatorDelimiters = ["-1-", "-2-", "-3-", "-4-", ".", "-", "-7-",];
-        if (!options.autoNumberingPattern)
-            return '';
-        const initialNumber = '1'; //SA??? for now
-        if (excludeFromToc) return '';
-        const level = headingLevel(token);
-        if (!autoSet.levels[level])
-            autoSet.levels[level] = { number: initialNumber };
-        if (level > autoSet.level) {
-            autoSet.levels[level].number = initialNumber;
-            autoSet.levels[level].accumulator =
-                autoSet.levels[autoSet.level] ?
-                    (
-                        autoSet.levels[autoSet.level].accumulator ?
-                            autoSet.levels[autoSet.level].accumulator + accumulatorDelimiters[autoSet.level] + autoSet.levels[autoSet.level].number
-                            : autoSet.levels[autoSet.level].number
-                    ) :
-                    '';
-        } else
-            autoSet.levels[level].number = nextNumber(autoSet.levels[level].number);
-        const result =
-            autoSet.levels[level].accumulator.length > 0 ?
-                util.format(
-                    "%s%s%s%s", autoSet.levels[level].accumulator,
-                    accumulatorDelimiters[level],
-                    autoSet.levels[level].number,
-                    options.autoNumberingSuffix)
-                : autoSet.levels[level].number + options.autoNumberingSuffix;
-        autoSet.level = level;
-        return result;
-    } //iterateAutoNumbering
+    function autoNumbering() {
+        const initializeAutoNumbering = function() {
+            return {
+                level: -1,
+                levels: []
+            };
+        }; //initializeAutoNumbering
+        const iterateAutoNumbering = function (excludeFromToc, autoSet, token) {
+            const accumulatorDelimiters = ["-1-", "-2-", "-3-", "-4-", ".", "-", "-7-",];
+            if (!options.autoNumberingPattern)
+                return '';
+            const initialNumber = '1'; //SA??? for now
+            if (excludeFromToc) return '';
+            const level = headingLevel(token);
+            if (!autoSet.levels[level])
+                autoSet.levels[level] = { number: initialNumber };
+            if (level > autoSet.level) {
+                autoSet.levels[level].number = initialNumber;
+                autoSet.levels[level].accumulator =
+                    autoSet.levels[autoSet.level] ?
+                        (
+                            autoSet.levels[autoSet.level].accumulator ?
+                                autoSet.levels[autoSet.level].accumulator + accumulatorDelimiters[autoSet.level] + autoSet.levels[autoSet.level].number
+                                : autoSet.levels[autoSet.level].number
+                        ) :
+                        '';
+            } else
+                autoSet.levels[level].number = nextNumber(autoSet.levels[level].number);
+            const result =
+                autoSet.levels[level].accumulator.length > 0 ?
+                    util.format(
+                        "%s%s%s%s", autoSet.levels[level].accumulator,
+                        accumulatorDelimiters[level],
+                        autoSet.levels[level].number,
+                        options.autoNumberingSuffix)
+                    : autoSet.levels[level].number + options.autoNumberingSuffix;
+            autoSet.level = level;
+            return result;
+        }; //iterateAutoNumbering
+        return { initializer: initializeAutoNumbering, iterator: iterateAutoNumbering };
+    } //autoNumbering
 
     function buildIdSet(idSet, tokens, excludeFromTocRegex, usedIds) {
+        const autoNumberingMethods = autoNumbering();
         // auto-numbers:
-        const autoSet = initializeAutoNumbering();
+        const autoSet = autoNumberingMethods.initializer();
         // end auto-numbers
         let lastLevel
         for (let index = 1; index < tokens.length; ++index) {
@@ -148,7 +150,7 @@ module.exports = function (md, userOptions) {
             } //if
             idSet.push({
                 id: slugify(headingTextToken.content, usedIds),
-                prefix: iterateAutoNumbering(excludeFromToc, autoSet, token)
+                prefix: autoNumberingMethods.iterator(excludeFromToc, autoSet, token)
             });
         } //loop
     } //buildIdSet
