@@ -101,17 +101,18 @@ module.exports = function (md, userOptions) {
             autoSet.levels[level] = { number: initialNumber };
         if (level > autoSet.level) {
             autoSet.levels[level].number = initialNumber;
-        } else {
+            autoSet.levels[level].accumulator =
+                autoSet.levels[autoSet.level] ?
+                    autoSet.levels[autoSet.level].accumulator + '.' + autoSet.levels[autoSet.level].number :
+                    '';
+        } else
             autoSet.levels[level].number = nextNumber(autoSet.levels[level].number);
-        }
-        autoSet.levels[level].accumulator =
-            autoSet.levels[autoSet.level] ?
-                autoSet.levels[autoSet.level].accumulator + '.' : '';
+        const result =
+            autoSet.levels[level].accumulator.length > 0 ? 
+            autoSet.levels[level].accumulator + '.' + autoSet.levels[level].number + ' ' :
+            autoSet.levels[level].number + ' ';
         autoSet.level = level;
-        autoSet.levels[level].accumulator = ''; // SA??? for now
-        const result = autoSet.levels[level].accumulator + autoSet.levels[level].number + ' ';
-        autoSet.levels[level].accumulator = result;
-        return result;
+        return result.replace(/^\./, '');
     } //iterateAutoNumbering
 
     function buildIdSet(idSet, tokens, excludeFromTocRegex, usedIds) {
