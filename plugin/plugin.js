@@ -91,24 +91,15 @@ module.exports = function (md, userOptions) {
     } //nextNumber    
 
     function autoNumbering() {
-        function getOption(level, property, defaultValue) {
+        function getOption(optionSet, level, property, defaultValue) {
             if (!defaultValue) defaultValue = '';
-            if (!options.autoNumberingPattern) return defaultValue;
+            if (!optionSet) return defaultValue;
             const arrayElement = options.autoNumberingPattern[level - 1];
             if (!arrayElement) return defaultValue;
             const propertyValue = arrayElement[property];
             if (!propertyValue) return defaultValue;
             return propertyValue;
         } //getOption
-        function getSeparator(level) {
-            return getOption(level, "separator", options.defaultAutoNumberingSeparator);
-        } //getSeparator
-        function getStart(level) {
-            return getOption(level, "start", options.defaultAutoAutoNumberingStart);
-        } //getStart
-        function getPrefix(level) {
-            return getOption(level, "prefix", options.defaultAutoAutoNumberingPrefix);
-        } //getStart
         function getDocumentLevelOptions(tokens) {
             if (tokens.length < 3) return;
             if (!options.autoNumberingRegex) return;
@@ -123,11 +114,20 @@ module.exports = function (md, userOptions) {
             return JSON.parse(match[1]);
         } //getDocumentLevelOptions
         const initializeAutoNumbering = function (tokens) {
-            const documentOptions = getDocumentLevelOptions(tokens);
+            const effectiveOptions = getDocumentLevelOptions(tokens);
+            if (!effectiveOptions) effectiveOptions = options.autoNumberingPattern;
             return {
                 level: -1,
                 levels: [],
-                documentOptions: documentOptions ? documentOptions : options.autoNumberingPattern
+                getSeparator: function(level) {
+                    return getOption(effectiveOptions, level, "separator", options.defaultAutoNumberingSeparator);
+                },
+                getStart: function(level) {
+                    return getOption(effectiveOptions, level, "start", options.defaultAutoAutoNumberingStart)
+                },
+                getPrefix: function(level) {
+                    return getOption(effectiveOptions, level, "prefix", options.defaultAutoAutoNumberingPrefix);
+                }
             };
         }; //initializeAutoNumbering
         const iterateAutoNumbering = function (excludeFromToc, autoSet, token) {
@@ -137,16 +137,16 @@ module.exports = function (md, userOptions) {
             if (excludeFromToc) return '';
             const level = headingLevel(token);
             if (!autoSet.levels[level])
-                autoSet.levels[level] = { number: getStart(level) };
+                autoSet.levels[level] = { number: autoSet.getStart(level) };
             if (level > autoSet.level) {
-                autoSet.levels[level].number = getStart(level);
+                autoSet.levels[level].number = autoSet.getStart(level);
                 autoSet.levels[level].accumulator =
                     autoSet.levels[autoSet.level] ?
                         (
                             autoSet.levels[autoSet.level].accumulator ?
                                 util.format("%s%s%s",
                                     autoSet.levels[autoSet.level].accumulator,
-                                    getSeparator(autoSet.level),
+                                    autoSet.getSeparator(autoSet.level),
                                     autoSet.levels[autoSet.level].number)
                                 : autoSet.levels[autoSet.level].number
                         ) :
@@ -157,11 +157,11 @@ module.exports = function (md, userOptions) {
                 autoSet.levels[level].accumulator.length > 0 ?
                     util.format(
                         "%s%s%s%s", autoSet.levels[level].accumulator,
-                        getSeparator(level),
+                        autoSet.getSeparator(level),
                         autoSet.levels[level].number,
                         options.autoNumberingSuffix)
                     : autoSet.levels[level].number + options.autoNumberingSuffix;
-            const prefix = getPrefix(level);
+            const prefix = autoSet.getPrefix(level);
             autoSet.level = level;
             return prefix + result;
         }; //iterateAutoNumbering
