@@ -4,10 +4,10 @@ const defaultOptions = {
     enableHeadingId: true,
     autoNumberingPattern: [
         { start: 1 },
-        { prefix: "Chapter ", start: 1 },
+        { prefix: "Part ", start: 1 },
         {},
         { start: 1, separator: '.', dropInherited: true }, // make a better name for drop*...
-        { separator: '-' }
+        { separator: '.' }
     ],
     autoNumberingSuffix: ". ",
     defaultAutoNumberingPrefix: '',
@@ -91,10 +91,10 @@ module.exports = function (md, userOptions) {
     } //nextNumber    
 
     function autoNumbering() {
-        function getOption(optionSet, level, property, defaultValue) {
+        function getOption(autoNumberingPattern, level, property, defaultValue) {
             if (!defaultValue) defaultValue = '';
-            if (!optionSet) return defaultValue;
-            const arrayElement = options.autoNumberingPattern[level - 1];
+            if (!autoNumberingPattern) return defaultValue;
+            const arrayElement = autoNumberingPattern[level - 1];
             if (!arrayElement) return defaultValue;
             const propertyValue = arrayElement[property];
             if (!propertyValue) return defaultValue;
@@ -171,7 +171,6 @@ module.exports = function (md, userOptions) {
     function buildIdSet(idSet, tokens, excludeFromTocRegex, usedIds) {
         const autoNumberingMethods = autoNumbering();
         const autoSet = autoNumberingMethods.initializer(tokens);
-        let lastLevel
         for (let index = 1; index < tokens.length; ++index) {
             const token = tokens[index];
             const headingTextToken = tokens[index - 1];
