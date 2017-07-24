@@ -246,10 +246,10 @@ module.exports = function (md, userOptions) {
             } else
                 currentLevel = level; // We init with the first found level
             const tocSlug = idSet[idCounts.toc].id;
-            let headingContent = idSet[idCounts.toc].prefix + heading.content;
+            const prefix = idSet[idCounts.toc].prefix;
             ++idCounts.toc;
-            listItemContent = util.format("<li><a href=\"#%s\">", tocSlug);
-            listItemContent += typeof options.format === "function" ? options.format(headingContent) : headingContent;
+            listItemContent = util.format("<li>%s<a href=\"#%s\">", prefix, tocSlug);
+            listItemContent += typeof options.format === "function" ? options.format(heading.content) : heading.content;
             listItemContent += "</a>";
             currentTokenIndex++;
         } //loop
