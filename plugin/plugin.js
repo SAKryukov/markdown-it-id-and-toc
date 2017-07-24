@@ -4,10 +4,14 @@ const defaultOptions = {
     enableHeadingId: true,
     autoNumberingPattern: [
         { start: 1 },
-        { start: 1 },
-        ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii', 'ix', 'x', 'xi', 'xii'],
-        { start: 1, accumulate: 6 },
+        { prefix: "Chapter ", start: 1 },
+        { },
+        { start: 1, accumulate: true },
     ],
+    autoNumberingSuffix: ". ",
+    defaultAutoNumberingPrefix: '',
+    defaultAutoAutoNumberingStart: 1,
+    autoNumberingRegex: "\\[\\]\\(numbering(*.?)\\)",
     includeLevel: [2, 4, 5, 6],
     tocContainerClass: "toc",
     tocRegex: "^\\[\\]\\(toc\\)",
@@ -16,8 +20,7 @@ const defaultOptions = {
     listElements: ["ul", "ul", "ul", "ul", "ul", "ul"],
     defaultListElementAttributeSet: { style: "list-style-type: none;" },
     listElementAttributeSets: [],
-    itemPrefixes: [], // array of strings: prefix depending on level
-    idPrefix: "headings.",
+    itemPrefixes: ['', 'Chapter '], // array of strings: prefix depending on level
     format: undefined
 }; //defaultOptions
 defaultOptions.bulletedListType = defaultOptions.defaultListElement;
@@ -91,22 +94,32 @@ module.exports = function (md, userOptions) {
             levels: []
         };
     } //initializeAutoNumbering
+    function getAutoNumberingOption(level, array, generic) {
+        if (!array) return generic;
+        if (!array[level - 1]) return generic;
+        if (!array[level - 1].length) return generic;
+        return array[level - 1];
+    } //getAutoNumberingOption
     function iterateAutoNumbering(excludeFromToc, autoSet, token) {
-        const accumulatorDelimiters = ["-1-", "-2-", "-3-", "-4-", ".", "-", "-7-", ];
+        if (excludeFromToc) return '';
+        const delimiters = ["", "", "", "", "-" ];
+        const defaultDelimiter = '.';
+        const initials = ["", "", "", "α", "a"];
+        const defaultInitial = 1;
         if (!options.autoNumberingPattern)
             return '';
-        const initialNumber = '1'; //SA??? for now
-        if (excludeFromToc) return '';
         const level = headingLevel(token);
+        const initialNumber = getAutoNumberingOption(level, initials, defaultInitial);
         if (!autoSet.levels[level])
             autoSet.levels[level] = { number: initialNumber };
         if (level > autoSet.level) {
             autoSet.levels[level].number = initialNumber;
+            const delimiter = getAutoNumberingOption(autoSet.level, delimiters, defaultDelimiter);
             autoSet.levels[level].accumulator =
                 autoSet.levels[autoSet.level] ?
                     (
                         autoSet.levels[autoSet.level].accumulator ?
-                            autoSet.levels[autoSet.level].accumulator + accumulatorDelimiters[autoSet.level] + autoSet.levels[autoSet.level].number
+                            autoSet.levels[autoSet.level].accumulator + delimiter + autoSet.levels[autoSet.level].number
                             : autoSet.levels[autoSet.level].number
                     ) :
                     '';
@@ -114,8 +127,12 @@ module.exports = function (md, userOptions) {
             autoSet.levels[level].number = nextNumber(autoSet.levels[level].number);
         const result =
             autoSet.levels[level].accumulator.length > 0 ? 
-                util.format("%s%s%s ", autoSet.levels[level].accumulator, accumulatorDelimiters[level], autoSet.levels[level].number)
-                : autoSet.levels[level].number + ' ';
+                util.format("%s%s%s%s",
+                    autoSet.levels[level].accumulator,
+                    getAutoNumberingOption(level, delimiters, defaultDelimiter),
+                    autoSet.levels[level].number,
+                    options.autoNumberingSuffix)
+                : autoSet.levels[level].number + options.autoNumberingSuffix;
         autoSet.level = level;
         return result;
     } //iterateAutoNumbering
@@ -232,9 +249,6 @@ module.exports = function (md, userOptions) {
             let headingContent = idSet[idCounts.toc].prefix + heading.content;
             ++idCounts.toc;
             listItemContent = util.format("<li><a href=\"#%s\">", tocSlug);
-            if (options.itemPrefixes)
-                if (options.itemPrefixes[currentLevel - 1])
-                    headingContent = options.itemPrefixes[currentLevel - 1] + headingContent;
             listItemContent += typeof options.format === "function" ? options.format(headingContent) : headingContent;
             listItemContent += "</a>";
             currentTokenIndex++;
