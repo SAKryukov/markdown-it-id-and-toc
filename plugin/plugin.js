@@ -103,7 +103,11 @@ module.exports = function (md, userOptions) {
             autoSet.levels[level].number = initialNumber;
             autoSet.levels[level].accumulator =
                 autoSet.levels[autoSet.level] ?
-                    autoSet.levels[autoSet.level].accumulator + '.' + autoSet.levels[autoSet.level].number :
+                    (
+                        autoSet.levels[autoSet.level].accumulator ?
+                            autoSet.levels[autoSet.level].accumulator + '.' + autoSet.levels[autoSet.level].number
+                            : autoSet.levels[autoSet.level].number
+                    ) :
                     '';
         } else
             autoSet.levels[level].number = nextNumber(autoSet.levels[level].number);
@@ -112,7 +116,7 @@ module.exports = function (md, userOptions) {
             autoSet.levels[level].accumulator + '.' + autoSet.levels[level].number + ' ' :
             autoSet.levels[level].number + ' ';
         autoSet.level = level;
-        return result.replace(/^\./, '');
+        return result;
     } //iterateAutoNumbering
 
     function buildIdSet(idSet, tokens, excludeFromTocRegex, usedIds) {
