@@ -92,6 +92,7 @@ module.exports = function (md, userOptions) {
         };
     } //initializeAutoNumbering
     function iterateAutoNumbering(excludeFromToc, autoSet, token) {
+        const accumulatorDelimiters = ["-1-", "-2-", "-3-", "-4-", ".", "-", "-7-", ];
         if (!options.autoNumberingPattern)
             return '';
         const initialNumber = '1'; //SA??? for now
@@ -105,7 +106,7 @@ module.exports = function (md, userOptions) {
                 autoSet.levels[autoSet.level] ?
                     (
                         autoSet.levels[autoSet.level].accumulator ?
-                            autoSet.levels[autoSet.level].accumulator + '.' + autoSet.levels[autoSet.level].number
+                            autoSet.levels[autoSet.level].accumulator + accumulatorDelimiters[autoSet.level] + autoSet.levels[autoSet.level].number
                             : autoSet.levels[autoSet.level].number
                     ) :
                     '';
@@ -113,8 +114,8 @@ module.exports = function (md, userOptions) {
             autoSet.levels[level].number = nextNumber(autoSet.levels[level].number);
         const result =
             autoSet.levels[level].accumulator.length > 0 ? 
-            autoSet.levels[level].accumulator + '.' + autoSet.levels[level].number + ' ' :
-            autoSet.levels[level].number + ' ';
+                util.format("%s%s%s ", autoSet.levels[level].accumulator, accumulatorDelimiters[level], autoSet.levels[level].number)
+                : autoSet.levels[level].number + ' ';
         autoSet.level = level;
         return result;
     } //iterateAutoNumbering
