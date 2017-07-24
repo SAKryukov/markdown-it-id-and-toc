@@ -133,21 +133,16 @@ module.exports = function (md, userOptions) {
                 if (!theSet.levels[theSet.level]) return '';
                 if (!theSet.levels[theSet.level].accumulator)
                     return theSet.levels[theSet.level].number;
-                return util.format("%s%s%s",
-                    theSet.levels[theSet.level].accumulator,
-                    theSet.getSeparator(theSet.level),
-                    theSet.levels[theSet.level].number)
-            }; //theSet.setAccumulator
-            theSet.setAccumulator = function (level) {
-                theSet.levels[level].accumulator = theSet.getAccumulator(level);
-            }; //theSet.setAccumulator
+                return theSet.levels[theSet.level].accumulator
+                    + theSet.getSeparator(theSet.level)
+                    + theSet.levels[theSet.level].number
+            }; //theSet.getAccumulator
             theSet.getNumberingText = function (level) {
                 return theSet.levels[level].accumulator.length > 0 ?
-                    util.format(
-                        "%s%s%s%s", theSet.levels[level].accumulator,
-                        theSet.getSeparator(level),
-                        theSet.levels[level].number,
-                        options.autoNumberingSuffix)
+                    theSet.levels[level].accumulator
+                    + theSet.getSeparator(level)
+                    + theSet.levels[level].number
+                    + options.autoNumberingSuffix
                     : theSet.levels[level].number + options.autoNumberingSuffix;
             }; //theSet.getNumberingText
             return theSet;
@@ -155,14 +150,13 @@ module.exports = function (md, userOptions) {
         const iterateAutoNumbering = function (excludeFromToc, autoSet, token) {
             if (!options.autoNumberingPattern)
                 return '';
-            const initialNumber = '1'; //SA??? for now
             if (excludeFromToc) return '';
             const level = headingLevel(token);
             if (!autoSet.levels[level])
                 autoSet.levels[level] = { number: autoSet.getStart(level) };
             if (level > autoSet.level) {
                 autoSet.levels[level].number = autoSet.getStart(level);
-                autoSet.setAccumulator(level);
+                autoSet.levels[level].accumulator = autoSet.getAccumulator(level);
             } else
                 autoSet.levels[level].number = nextNumber(autoSet.levels[level].number);
             const result = autoSet.getNumberingText(level);
