@@ -6,11 +6,13 @@ const defaultOptions = {
         { start: 1 },
         { prefix: "Chapter ", start: 1 },
         {},
-        { start: 1, dropInherited: true }, // make a better name for drop*...
+        { start: 1, separator: '.', dropInherited: true }, // make a better name for drop*...
+        { separator: '-'}
     ],
     autoNumberingSuffix: ". ",
     defaultAutoNumberingPrefix: '',
     defaultAutoAutoNumberingStart: 1,
+    defaultAutoNumberingSeparator: '.',
     autoNumberingRegex: "\\[\\]\\(numbering(*.?)\\)",
     includeLevel: [2, 4, 5, 6],
     tocContainerClass: "toc",
@@ -89,6 +91,24 @@ module.exports = function (md, userOptions) {
     } //nextNumber    
 
     function autoNumbering() {
+        function getOption(level, property, defaultValue) {
+            if (!defaultValue) defaultValue = '';
+            if (!options.autoNumberingPattern) return defaultValue;
+            const arrayElement = options.autoNumberingPattern[level - 1]; 
+            if (!arrayElement) return defaultValue;
+            const propertyValue = arrayElement[property];
+            if (!propertyValue) return defaultValue;
+            return propertyValue;
+        } //getOption
+        function getSeparator(level) {
+            return getOption(level, "separator", options.defaultAutoNumberingSeparator);
+        } //getSeparator
+        function getStart(level) {
+            return getOption(level, "start", options.defaultAutoAutoNumberingStart);
+        } //getStart
+        function getPrefix(level) {
+            return getOption(level, "prefix", options.defaultAutoAutoNumberingPrefix);
+        } //getStart
         const initializeAutoNumbering = function() {
             return {
                 level: -1,
@@ -96,21 +116,23 @@ module.exports = function (md, userOptions) {
             };
         }; //initializeAutoNumbering
         const iterateAutoNumbering = function (excludeFromToc, autoSet, token) {
-            const accumulatorDelimiters = ["-1-", "-2-", "-3-", "-4-", ".", "-", "-7-",];
             if (!options.autoNumberingPattern)
                 return '';
             const initialNumber = '1'; //SA??? for now
             if (excludeFromToc) return '';
             const level = headingLevel(token);
             if (!autoSet.levels[level])
-                autoSet.levels[level] = { number: initialNumber };
+                autoSet.levels[level] = { number: getStart(level) };
             if (level > autoSet.level) {
-                autoSet.levels[level].number = initialNumber;
+                autoSet.levels[level].number = getStart(level);
                 autoSet.levels[level].accumulator =
                     autoSet.levels[autoSet.level] ?
                         (
                             autoSet.levels[autoSet.level].accumulator ?
-                                autoSet.levels[autoSet.level].accumulator + accumulatorDelimiters[autoSet.level] + autoSet.levels[autoSet.level].number
+                                util.format("%s%s%s",
+                                    autoSet.levels[autoSet.level].accumulator,
+                                    getSeparator(autoSet.level),
+                                    autoSet.levels[autoSet.level].number)
                                 : autoSet.levels[autoSet.level].number
                         ) :
                         '';
@@ -120,12 +142,13 @@ module.exports = function (md, userOptions) {
                 autoSet.levels[level].accumulator.length > 0 ?
                     util.format(
                         "%s%s%s%s", autoSet.levels[level].accumulator,
-                        accumulatorDelimiters[level],
+                        getSeparator(level),
                         autoSet.levels[level].number,
                         options.autoNumberingSuffix)
                     : autoSet.levels[level].number + options.autoNumberingSuffix;
+            const prefix = getPrefix(level);
             autoSet.level = level;
-            return result;
+            return  prefix + result;
         }; //iterateAutoNumbering
         return { initializer: initializeAutoNumbering, iterator: iterateAutoNumbering };
     } //autoNumbering
