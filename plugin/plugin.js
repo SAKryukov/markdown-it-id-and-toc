@@ -129,18 +129,17 @@ module.exports = function (md, userOptions) {
                     return getOption(effectiveOptions, level, "prefix", options.defaultAutoAutoNumberingPrefix);
                 }
             }; //theSet
+            theSet.getAccumulator = function (level) {
+                if (!theSet.levels[theSet.level]) return '';
+                if (!theSet.levels[theSet.level].accumulator)
+                    return theSet.levels[theSet.level].number;
+                return util.format("%s%s%s",
+                    theSet.levels[theSet.level].accumulator,
+                    theSet.getSeparator(theSet.level),
+                    theSet.levels[theSet.level].number)
+            }; //theSet.setAccumulator
             theSet.setAccumulator = function (level) {
-                theSet.levels[level].accumulator =
-                    theSet.levels[theSet.level] ?
-                        (
-                            theSet.levels[theSet.level].accumulator ?
-                                util.format("%s%s%s",
-                                    theSet.levels[theSet.level].accumulator,
-                                    theSet.getSeparator(theSet.level),
-                                    theSet.levels[theSet.level].number)
-                                : theSet.levels[theSet.level].number
-                        ) :
-                        '';
+                theSet.levels[level].accumulator = theSet.getAccumulator(level);
             }; //theSet.setAccumulator
             theSet.getNumberingText = function (level) {
                 return theSet.levels[level].accumulator.length > 0 ?
@@ -166,7 +165,7 @@ module.exports = function (md, userOptions) {
                 autoSet.setAccumulator(level);
             } else
                 autoSet.levels[level].number = nextNumber(autoSet.levels[level].number);
-            const result = autoSet.getNumberingText(level); 
+            const result = autoSet.getNumberingText(level);
             const prefix = autoSet.getPrefix(level);
             autoSet.level = level;
             return prefix + result;
