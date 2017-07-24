@@ -116,19 +116,42 @@ module.exports = function (md, userOptions) {
         const initializeAutoNumbering = function (tokens) {
             const effectiveOptions = getDocumentLevelOptions(tokens);
             if (!effectiveOptions) effectiveOptions = options.autoNumberingPattern;
-            return {
+            const theSet = {
                 level: -1,
                 levels: [],
-                getSeparator: function(level) {
+                getSeparator: function (level) {
                     return getOption(effectiveOptions, level, "separator", options.defaultAutoNumberingSeparator);
                 },
-                getStart: function(level) {
+                getStart: function (level) {
                     return getOption(effectiveOptions, level, "start", options.defaultAutoAutoNumberingStart)
                 },
-                getPrefix: function(level) {
+                getPrefix: function (level) {
                     return getOption(effectiveOptions, level, "prefix", options.defaultAutoAutoNumberingPrefix);
                 }
-            };
+            }; //theSet
+            theSet.setAccumulator = function (level) {
+                theSet.levels[level].accumulator =
+                    theSet.levels[theSet.level] ?
+                        (
+                            theSet.levels[theSet.level].accumulator ?
+                                util.format("%s%s%s",
+                                    theSet.levels[theSet.level].accumulator,
+                                    theSet.getSeparator(theSet.level),
+                                    theSet.levels[theSet.level].number)
+                                : theSet.levels[theSet.level].number
+                        ) :
+                        '';
+            }; //theSet.setAccumulator
+            theSet.getNumberingText = function (level) {
+                return theSet.levels[level].accumulator.length > 0 ?
+                    util.format(
+                        "%s%s%s%s", theSet.levels[level].accumulator,
+                        theSet.getSeparator(level),
+                        theSet.levels[level].number,
+                        options.autoNumberingSuffix)
+                    : theSet.levels[level].number + options.autoNumberingSuffix;
+            }; //theSet.getNumberingText
+            return theSet;
         }; //initializeAutoNumbering
         const iterateAutoNumbering = function (excludeFromToc, autoSet, token) {
             if (!options.autoNumberingPattern)
@@ -140,27 +163,10 @@ module.exports = function (md, userOptions) {
                 autoSet.levels[level] = { number: autoSet.getStart(level) };
             if (level > autoSet.level) {
                 autoSet.levels[level].number = autoSet.getStart(level);
-                autoSet.levels[level].accumulator =
-                    autoSet.levels[autoSet.level] ?
-                        (
-                            autoSet.levels[autoSet.level].accumulator ?
-                                util.format("%s%s%s",
-                                    autoSet.levels[autoSet.level].accumulator,
-                                    autoSet.getSeparator(autoSet.level),
-                                    autoSet.levels[autoSet.level].number)
-                                : autoSet.levels[autoSet.level].number
-                        ) :
-                        '';
+                autoSet.setAccumulator(level);
             } else
                 autoSet.levels[level].number = nextNumber(autoSet.levels[level].number);
-            const result =
-                autoSet.levels[level].accumulator.length > 0 ?
-                    util.format(
-                        "%s%s%s%s", autoSet.levels[level].accumulator,
-                        autoSet.getSeparator(level),
-                        autoSet.levels[level].number,
-                        options.autoNumberingSuffix)
-                    : autoSet.levels[level].number + options.autoNumberingSuffix;
+            const result = autoSet.getNumberingText(level); 
             const prefix = autoSet.getPrefix(level);
             autoSet.level = level;
             return prefix + result;
