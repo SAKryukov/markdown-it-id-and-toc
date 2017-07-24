@@ -2,17 +2,19 @@
 
 const defaultOptions = {
     enableHeadingId: true,
-    autoNumberingPattern: [
-        { start: 1 },
-        { prefix: "Part ", start: 1 },
-        {},
-        { start: 1, separator: '.', dropInherited: true }, // make a better name for drop*...
-        { separator: '.' }
-    ],
-    autoNumberingSuffix: ". ",
-    defaultAutoNumberingPrefix: '',
-    defaultAutoAutoNumberingStart: 1,
-    defaultAutoNumberingSeparator: '.',
+    autoNumbering: {
+        pattern: [
+            { start: 1 },
+            { prefix: "Part ", start: 1 },
+            {},
+            { start: 1, separator: '.', standAlong: true },
+            { separator: '.' }
+        ],
+        suffix: ". ",
+        defaultPrefix: '',
+        defaultStart: 1,
+        defaultSeparator: '.',
+    },
     autoNumberingRegex: "\\[\\]\\(numbering([\\s\\S]*?)\\)",
     includeLevel: [2, 4, 5, 6],
     tocContainerClass: "toc",
@@ -91,10 +93,12 @@ module.exports = function (md, userOptions) {
     } //nextNumber    
 
     function autoNumbering() {
-        function getOption(autoNumberingPattern, level, property, defaultValue) {
+        function getOption(optionSet, level, property, defaultValue) {
             if (!defaultValue) defaultValue = '';
-            if (!autoNumberingPattern) return defaultValue;
-            const arrayElement = autoNumberingPattern[level - 1];
+            if (!optionSet) return defaultValue;
+            const pattern = optionSet.pattern;
+            if (!pattern) return defaultValue;
+            const arrayElement = pattern[level - 1];
             if (!arrayElement) return defaultValue;
             const propertyValue = arrayElement[property];
             if (!propertyValue) return defaultValue;
@@ -115,18 +119,22 @@ module.exports = function (md, userOptions) {
         } //getDocumentLevelOptions
         const initializeAutoNumbering = function (tokens) {
             const effectiveOptions = getDocumentLevelOptions(tokens);
-            if (!effectiveOptions) effectiveOptions = options.autoNumberingPattern;
+            if (!effectiveOptions) effectiveOptions = options.autoNumbering;
             const theSet = {
                 level: -1,
                 levels: [],
+                effectiveOptions: effectiveOptions,
                 getSeparator: function (level) {
-                    return getOption(effectiveOptions, level, "separator", options.defaultAutoNumberingSeparator);
+                    return getOption(effectiveOptions, level, "separator", effectiveOptions.defaultSeparator);
                 },
                 getStart: function (level) {
-                    return getOption(effectiveOptions, level, "start", options.defaultAutoAutoNumberingStart)
+                    return getOption(effectiveOptions, level, "start", effectiveOptions.defaultStart)
                 },
                 getPrefix: function (level) {
-                    return getOption(effectiveOptions, level, "prefix", options.defaultAutoAutoNumberingPrefix);
+                    return getOption(effectiveOptions, level, "prefix", effectiveOptions.defaultPrefix);
+                },
+                getSuffix: function (level) {
+                    return effectiveOptions.suffix;
                 }
             }; //theSet
             theSet.getAccumulator = function (level) {
@@ -141,15 +149,12 @@ module.exports = function (md, userOptions) {
                 return theSet.levels[level].accumulator.length > 0 ?
                     theSet.levels[level].accumulator
                     + theSet.getSeparator(level)
-                    + theSet.levels[level].number
-                    + options.autoNumberingSuffix
-                    : theSet.levels[level].number + options.autoNumberingSuffix;
+                    + theSet.levels[level].number.toString()
+                    : theSet.levels[level].number.toString();
             }; //theSet.getNumberingText
             return theSet;
         }; //initializeAutoNumbering
         const iterateAutoNumbering = function (excludeFromToc, autoSet, token) {
-            if (!options.autoNumberingPattern)
-                return '';
             if (excludeFromToc) return '';
             const level = headingLevel(token);
             if (!autoSet.levels[level])
@@ -161,8 +166,9 @@ module.exports = function (md, userOptions) {
                 autoSet.levels[level].number = nextNumber(autoSet.levels[level].number);
             const result = autoSet.getNumberingText(level);
             const prefix = autoSet.getPrefix(level);
+            const suffix = autoSet.getSuffix(level);
             autoSet.level = level;
-            return prefix + result;
+            return prefix + result + suffix;
         }; //iterateAutoNumbering
         return { initializer: initializeAutoNumbering, iterator: iterateAutoNumbering };
     } //autoNumbering
