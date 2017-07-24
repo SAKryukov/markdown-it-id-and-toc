@@ -2,6 +2,12 @@
 
 const defaultOptions = {
     enableHeadingId: true,
+    autoNumberingPattern: [
+        { start: 1 },
+        { start: 1 },
+        ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii', 'ix', 'x', 'xi', 'xii'],
+        { start: 1, accumulate: 6 },
+    ],
     includeLevel: [2, 4, 5, 6],
     tocContainerClass: "toc",
     tocRegex: "^\\[\\]\\(toc\\)",
@@ -24,27 +30,6 @@ module.exports = function (md, userOptions) {
     if (userOptions)
         for (let index in userOptions)
             options[index] = userOptions[index];
-
-    const slugify = function (s, used) {
-        let slug = options.idPrefix +
-            s.replace(' ', '-')
-                .replace(/[^A-Za-z0-9\-\.\_]/g, function (match) {
-                    return match.codePointAt().toString(16);
-                }).toLowerCase();
-        while (used[slug])
-            slug += '.';
-        used[slug] = slug;
-        return slug;
-    } // idHeadersSlugify
-
-    // function nextNumber(number) { // number is a letter of a number as string or numeric
-    //     let tryNumeric = parseInt(number);
-    //     if (isNaN(tryNumeric)) {
-    //         let codePoint = number.codePointAt();
-    //         return String.fromCodePoint(++codePoint);
-    //     } else
-    //         return (++tryNumeric).toString();
-    // } //nextNumber
 
     // no magic function names:
     const tocFunctionNames = { open: "tocOpen", close: "tocClose", body: "tocBody" };
@@ -77,7 +62,63 @@ module.exports = function (md, userOptions) {
         detectAndPushToc(tocRegexp);
     }); //md.core.ruler.before
 
+    const slugify = function (s, used) {
+        let slug = options.idPrefix +
+            s.replace(' ', '-')
+                .replace(/[^A-Za-z0-9\-\.\_]/g, function (match) {
+                    return match.codePointAt().toString(16);
+                }).toLowerCase();
+        while (used[slug])
+            slug += '.';
+        used[slug] = slug;
+        return slug;
+    } // idHeadersSlugify    
+
+    function headingLevel(token) { return token.tag && parseInt(token.tag.substr(1, 1)); }
+
+    function nextNumber(number) { // number is a letter of a number as string or numeric
+        let tryNumeric = parseInt(number);
+        if (isNaN(tryNumeric)) {
+            let codePoint = number.codePointAt();
+            return String.fromCodePoint(++codePoint);
+        } else
+            return (++tryNumeric).toString();
+    } //nextNumber    
+
+    function initializeAutoNumbering() {
+        return {
+            level: -1,
+            levels: []
+        };
+    } //initializeAutoNumbering
+    function iterateAutoNumbering(excludeFromToc, autoSet, token) {
+        if (!options.autoNumberingPattern)
+            return '';
+        const initialNumber = '1'; //SA??? for now
+        if (excludeFromToc) return '';
+        const level = headingLevel(token);
+        if (!autoSet.levels[level])
+            autoSet.levels[level] = { number: initialNumber };
+        if (level > autoSet.level) {
+            autoSet.levels[level].number = initialNumber;
+        } else {
+            autoSet.levels[level].number = nextNumber(autoSet.levels[level].number);
+        }
+        autoSet.levels[level].accumulator =
+            autoSet.levels[autoSet.level] ?
+                autoSet.levels[autoSet.level].accumulator + '.' : '';
+        autoSet.level = level;
+        autoSet.levels[level].accumulator = ''; // SA??? for now
+        const result = autoSet.levels[level].accumulator + autoSet.levels[level].number + ' ';
+        autoSet.levels[level].accumulator = result;
+        return result;
+    } //iterateAutoNumbering
+
     function buildIdSet(idSet, tokens, excludeFromTocRegex, usedIds) {
+        // auto-numbers:
+        const autoSet = initializeAutoNumbering();
+        // end auto-numbers
+        let lastLevel
         for (let index = 1; index < tokens.length; ++index) {
             const token = tokens[index];
             const headingTextToken = tokens[index - 1];
@@ -86,13 +127,13 @@ module.exports = function (md, userOptions) {
             if (excludeFromTocRegex) {
                 const oldContent = headingTextToken.content;
                 headingTextToken.content = headingTextToken.content.replace(excludeFromTocRegex, "");
-                excludeFromToc = oldContent !== headingTextToken.content; 
+                excludeFromToc = oldContent !== headingTextToken.content;
                 if (excludeFromToc)
                     usedIds.excludeFromToc[index] = token;
             } //if
             idSet.push({
                 id: slugify(headingTextToken.content, usedIds),
-                prefix: ""
+                prefix: iterateAutoNumbering(excludeFromToc, autoSet, token)
             });
         } //loop
     } //buildIdSet
@@ -153,7 +194,7 @@ module.exports = function (md, userOptions) {
             const token = tokens[currentTokenIndex];
             const heading = tokens[currentTokenIndex - 1];
             if (!heading) { currentTokenIndex++; continue; }
-            const level = token.tag && parseInt(token.tag.substr(1, 1));
+            const level = headingLevel(token);
             if (token.type !== "heading_close" || heading.type !== "inline") {
                 currentTokenIndex++;
                 continue;
