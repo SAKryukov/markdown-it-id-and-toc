@@ -13,6 +13,14 @@ Isn't that confusing: what markdown-it plugins for generation of TOC and heading
 - Customizable sets of attributes for HTML list elements (not only CSS classes), global or individual for each TOC level
 - Customizable CSS class of TOC's parent `div` element
 
+## Installation
+
+Install [npm package](https://www.npmjs.com/package/markdown-it-id-and-toc):
+
+```
+npm install markdown-it-id-and-toc
+```
+
 ## Options
 
 For detailed description, please see the plugin [documentation](https://sakryukov.github.io/markdown-it-id-and-toc).
