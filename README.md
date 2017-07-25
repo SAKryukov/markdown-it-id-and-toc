@@ -15,6 +15,8 @@ Isn't that confusing: what markdown-it plugins for generation of TOC and heading
 
 ## Options
 
+For detailed description, please see the plugin [documentation]().
+
 This is just a self-explaining sample
 ```
     enableHeadingId: true,

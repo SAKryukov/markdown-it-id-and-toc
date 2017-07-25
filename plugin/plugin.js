@@ -2,7 +2,13 @@
 
 const defaultOptions = {
     enableHeadingId: true,
-    autoNumbering: undefined,
+    autoNumbering: {
+        "pattern": [],
+        "defaultSuffix": ". ",
+        "defaultPrefix": "",
+        "defaultStart": 1,
+        "defaultSeparator": "."
+    },
     autoNumberingRegex: "\\[\\]\\(\\=numbering([\\s\\S]*?)\\=\\)",
     includeLevel: [2, 4, 5, 6],
     tocContainerClass: "toc",
@@ -123,7 +129,7 @@ module.exports = function (md, userOptions) {
                 },
                 getSuffix: function (level) {
                     return getOption(effectiveOptions, level, "suffix", effectiveOptions.defaultSuffix);
-                },                
+                },
                 getStandAlong: function (level) {
                     return getOption(effectiveOptions, level, "standAlong", effectiveOptions.defaultPrefix);
                 }
@@ -137,7 +143,7 @@ module.exports = function (md, userOptions) {
                     + theSet.levels[theSet.level].number
             }; //theSet.getAccumulator
             theSet.getNumberingText = function (level) {
-                const standAlong = theSet.getStandAlong(level); 
+                const standAlong = theSet.getStandAlong(level);
                 return (!standAlong) && theSet.levels[level].accumulator.length > 0 ?
                     theSet.levels[level].accumulator
                     + theSet.getSeparator(level)
