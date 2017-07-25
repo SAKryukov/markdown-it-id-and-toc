@@ -7,21 +7,57 @@ Isn't that confusing: what markdown-it plugins for generation of TOC and heading
 - Proven uniqueness if `id` values and identity of `id` values in headings and TOC
 - Tagging for both TOC and "exclude from TOC" headings, user-configurable syntax
 - User-configurable `id` prefixes
+- Optional user-configurable auto-numbering with rich set of options
+- Auto-numbering pattern can be defined in Markdown document
 - Customizable choice of HTML element list types, global or individual for each TOC level: `ul` (default), `ol` or anything else
 - Customizable sets of attributes for HTML list elements (not only CSS classes), global or individual for each TOC level
 - Customizable CSS class of TOC's parent `div` element
 
 ## Options
 
+This is just a self-explaining sample
 ```
-    includeLevel: [1, 2, 3, 4, 5, 6],
-    tocContainerClass: "toc"
-    tocRegex: "^\\[\\]\\(toc\\)"
-    excludeFromTocRegex: "\\{\\}\\(notoc\\)"
-    defaultListElement: "ul"
-    listElements: ["ul", "ul", "ul", "ul", "ul", "ul"]
-    defaultListElementAttributeSet: { style: "list-style-type: none;" }
-    listElementAttributeSets: []
-    itemPrefixes: [] // array of strings: prefix depending on level
-    idPrefix: "headings."
+    enableHeadingId: true,
+    autoNumbering: {
+        pattern: [
+            { start: 1 },
+            { prefix: "Part ", start: 1 },
+            {},
+            { start: 1, separator: '-', standAlong: true },
+            { separator: '.' }
+        ],
+        defaultPrefix: '',
+        defaultSuffix: ". ",
+        defaultStart: 1,
+        defaultSeparator: '.',
+    },
+    autoNumberingRegex: "\\[\\]\\(\\=numbering([\\s\\S]*?)\\=\\)",
+    includeLevel: [2, 4, 5, 6],
+    tocContainerClass: "toc",
+    tocRegex: "^\\[\\]\\(toc\\)",
+    excludeFromTocRegex: "\\[\\]\\(notoc\\)",
+    defaultListElement: "ul",
+    listElements: ["ul", "ul", "ul", "ul", "ul", "ul"],
+    defaultListElementAttributeSet: { style: "list-style-type: none;" },
+    listElementAttributeSets: [],
+    idPrefix: "headings.",
+    format: undefined
+```
+
+Example of auto-numbering options defined as a first paragraph in the document:
+
+```
+[](=numbering                {
+    "pattern": [
+        { "start": 1 },
+        { "prefix": "Chapter ", "start": 1 },
+        { },
+        { "start": 1, "separator": ".", "standAlong": true },
+        { "suffix": ") ", "start": "a", "separator":".", "standAlong":true }
+    ],
+    "defaultSuffix": ". ",
+    "defaultPrefix": "",
+    "defaultStart": 1,
+    "defaultSeparator": "."
+}=)
 ```

@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 3.0.0
+
+* Added user-configurable auto-numbering
+
 ## Version 2.0.3
 
 * Code refactoring for better readability
