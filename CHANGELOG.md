@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 3.0.2
+
+* Fixed regression bug in auto-numbering, related to handling of RegExp failure: if first token is paragraph and not a auto-numbering settings tag, it wasn't rendering
+
 ## Version 3.0.1
 
 * Fixed a bug in 3.0.0: failed second run of rendering without reloading; the handlers were set again
