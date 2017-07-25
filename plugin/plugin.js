@@ -2,19 +2,7 @@
 
 const defaultOptions = {
     enableHeadingId: true,
-    autoNumbering: {
-        pattern: [
-            { start: 1 },
-            { prefix: "Part ", start: 1 },
-            {},
-            { start: 1, separator: '-', standAlong: true },
-            { separator: '.' }
-        ],
-        defaultPrefix: '',
-        defaultSuffix: ". ",
-        defaultStart: 1,
-        defaultSeparator: '.',
-    },
+    autoNumbering: undefined,
     autoNumberingRegex: "\\[\\]\\(\\=numbering([\\s\\S]*?)\\=\\)",
     includeLevel: [2, 4, 5, 6],
     tocContainerClass: "toc",
@@ -24,8 +12,7 @@ const defaultOptions = {
     listElements: ["ul", "ul", "ul", "ul", "ul", "ul"],
     defaultListElementAttributeSet: { style: "list-style-type: none;" },
     listElementAttributeSets: [],
-    idPrefix: "headings.",
-    format: undefined
+    idPrefix: "headings."
 }; //defaultOptions
 defaultOptions.bulletedListType = defaultOptions.defaultListElement;
 
@@ -292,7 +279,7 @@ module.exports = function (md, userOptions) {
             if (options.itemPrefixes)
                 if (options.itemPrefixes[currentLevel - 1])
                     headingContent = options.itemPrefixes[currentLevel - 1] + headingContent;
-            listItemContent += typeof options.format === "function" ? options.format(heading.content) : heading.content;
+            listItemContent += heading.content;
             listItemContent += "</a>";
             currentTokenIndex++;
         } //loop
