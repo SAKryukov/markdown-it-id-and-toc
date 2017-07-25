@@ -23,7 +23,7 @@
   "bugs": {
     "url": "https://github.com/SAKryukov/markdown-it-id-and-toc/issues"
   },
-  "homepage": "https://github.com/SAKryukov/markdown-it-id-and-toc#readme",
+  "homepage": "https://sakryukov.github.io/markdown-it-id-and-toc",
   "peerDependencies": {
     "markdown-it": ">=8.2.2"
   },
