@@ -118,8 +118,9 @@ module.exports = function (md, userOptions) {
             return JSON.parse(match[1]);
         } //getDocumentLevelOptions
         const initializeAutoNumbering = function (tokens) {
-            const effectiveOptions = getDocumentLevelOptions(tokens);
+            let effectiveOptions = getDocumentLevelOptions(tokens);
             if (!effectiveOptions) effectiveOptions = options.autoNumbering;
+            if (!effectiveOptions) return null;
             const theSet = {
                 level: -1,
                 levels: [],
@@ -159,6 +160,7 @@ module.exports = function (md, userOptions) {
             return theSet;
         }; //initializeAutoNumbering
         const iterateAutoNumbering = function (excludeFromToc, autoSet, token) {
+            if (!autoSet) return '';
             if (excludeFromToc) return '';
             const level = headingLevel(token);
             if (!autoSet.levels[level])
