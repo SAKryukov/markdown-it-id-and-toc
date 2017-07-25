@@ -1,0 +1,196 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Markdown-it Heading Id and TOC Plugin</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <style type="text/css">
+	body > p:first-child { font-size: 240%; text-align: center; }
+	body > p:nth-child(2) { text-align: right; }
+	div.toc ul { list-style-type: none; }
+	code { font-size: 130%; }
+        pre, code { color: darkGreen; padding:0; font-family: 'Consolas', sans-serif }
+        pre, pre code { color: black; font-size: 100%; background-color: antiqueWhite; }
+        html, body, p { font-family: 'Verdana', 'Ububtu', serif; }
+        blockquote { margin-left: 2em; }
+	th, td { border: thin solid black; padding-left: 1em; padding-right: 1em; }
+	th { border-bottom: solid black 2px; }
+	th { background-color: lightGray; font-weight: normal; font-size: 100%; }
+	table { border: solid black 2px; border-collapse: collapse; }
+    </style>
+</head>
+<body>
+
+<p>Markdown-it Heading Id and TOC Plugin<a href="title"></a></p>
+<p><a href="https://www.SAKryukov.org"><em>Sergey A Kryukov</em></a></p>
+<p>The <a href="https://www.npmjs.com/package/markdown-it">“markdown-it”</a> plugin <a href="https://www.npmjs.com/package/markdown-it-id-and-toc">markdown-it-id-and-toc</a> adds <code>id</code> attributes to the headings and Table of Contents (TOC) with optional feature-rich user-configurable auto-numbering.</p>
+<p>The decision to implement these features in the same plugin package leads to guaranteed referential integrity of the document and uniqueness of <code>id</code> values.</p>
+<h2 id="heading.contents5b5d28notoc29" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined">Contents</h2>
+<p><div class="toc"><ul style="list-style-type: none;"><li><a href="#heading.features">Features</a></li><li><a href="#heading.options">Options</a></li><li><a href="#heading.auto-numbering-options">Auto-Numbering Options</a><ul style="list-style-type: none;"><li><a href="#heading.default-auto-numbering20structure">Default Auto-Numbering Structure</a></li></ul></li></ul></div></p>
+<h2 id="heading.features" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined">Features</h2>
+<ul>
+<li>Proven uniqueness if <code>id</code> values and identity of <code>id</code> values in headings and TOC</li>
+<li>Tagging for both TOC and “exclude from TOC” headings, user-configurable syntax</li>
+<li>User-configurable <code>id</code> prefixes</li>
+<li>Optional user-configurable auto-numbering with rich set of options</li>
+<li>Auto-numbering pattern can be defined in Markdown document</li>
+<li>Customizable choice of HTML element list types, global or individual for each TOC level: <code>ul</code> (default), <code>ol</code> or anything else</li>
+<li>Customizable sets of attributes for HTML list elements (not only CSS classes), global or individual for each TOC level</li>
+<li>Customizable CSS class of TOC’s parent <code>div</code> element</li>
+</ul>
+<h2 id="heading.options" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined">Options</h2>
+<table>
+<thead>
+<tr>
+<th>Property Name</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>enableHeadingId</td>
+<td>true</td>
+<td>Enables or disables both features: adding <code>id</code> attributes to headings and TOC</td>
+</tr>
+<tr>
+<td>autoNumbering</td>
+<td><code>undefined</code></td>
+<td>Defines structure of auto-numbering (see <a href="#heading.auto-numbering-options">Auto-Numbering Options</a>)</td>
+</tr>
+<tr>
+<td>autoNumberingRegex</td>
+<td><code>\[\]\(\=numbering([\s\S]*?)\=\)</code></td>
+<td>RegExp object or Regular Expression string for a tag used to define auto-numbering structure in a document, should come as a first paragraph of a document</td>
+</tr>
+<tr>
+<td>includeLevel</td>
+<td><code>[1, 2, 3, 4, 5, 6]</code></td>
+<td>Levels of headings <code>h1</code> to <code>h6</code> to be included in TOC</td>
+</tr>
+<tr>
+<td>tocContainerClass</td>
+<td>toc</td>
+<td>Name of a CSS class of a <code>div</code> element surrounding the TOC content</td>
+</tr>
+<tr>
+<td>tocRegex</td>
+<td><code>^\[\]\(toc\)</code></td>
+<td>RegExp object or Regular Expression string of a tag marking TOC placement</td>
+</tr>
+<tr>
+<td>excludeFromTocRegex</td>
+<td><code>\[\]\(notoc\)</code></td>
+<td>RegExp object or Regular Expression string of a tag marking individual headings not to be included in TOC</td>
+</tr>
+<tr>
+<td>defaultListElement</td>
+<td>ul</td>
+<td>Array of HTML element. Due to availability of auto-numbering, it make little to no sense to use any non-default values.</td>
+</tr>
+<tr>
+<td>listElements</td>
+<td><code>[&quot;ul&quot;, &quot;ul&quot;, &quot;ul&quot;, &quot;ul&quot;, &quot;ul&quot;, &quot;ul&quot;]</code></td>
+<td>Array of HTML elements to be used as TOC list, per heading level. Due to availability of auto-numbering, it make little to no sense to use any non-default values.</td>
+</tr>
+<tr>
+<td>defaultListElementAttributeSet</td>
+<td><code>{ style: &quot;list-style-type: none;&quot; }</code></td>
+<td>Set of HTML attributes added to each HTML list element within TOC, such as <code>ul</code> (default)</td>
+</tr>
+<tr>
+<td>listElementAttributeSets</td>
+<td><code>[]</code></td>
+<td>Set of HTML attributes, same as above, but per heading level</td>
+</tr>
+<tr>
+<td>idPrefix</td>
+<td><code>headings.</code></td>
+<td>Sting used as a prefix to all values of <code>id</code> attributes of heading elements</td>
+</tr>
+</tbody>
+</table>
+<p>This is a JavaScript sample of the plugin options object with default values:</p>
+<pre><code>{
+    enableHeadingId: true,
+    autoNumbering: undefined,
+    autoNumberingRegex: &quot;\\[\\]\\(\\=numbering([\\s\\S]*?)\\=\\)&quot;,
+    includeLevel: [1, 2, 3, 4, 5, 6],
+    tocContainerClass: &quot;toc&quot;,
+    tocRegex: &quot;^\\[\\]\\(toc\\)&quot;,
+    excludeFromTocRegex: &quot;\\[\\]\\(notoc\\)&quot;,
+    defaultListElement: &quot;ul&quot;,
+    listElements: [&quot;ul&quot;, &quot;ul&quot;, &quot;ul&quot;, &quot;ul&quot;, &quot;ul&quot;, &quot;ul&quot;],
+    defaultListElementAttributeSet: { style: &quot;list-style-type: none;&quot; },
+    listElementAttributeSets: [],
+    idPrefix: &quot;headings.&quot;
+}
+</code></pre>
+<h2 id="heading.auto-numbering-options" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined">Auto-Numbering Options</h2>
+<p>Auto-numbering structure could be defined in two ways: at the level of plugin options, through the option “<a href="#heading.options">autoNumbering</a>”, or at the level of the document. The document-level settings take precedence.</p>
+<p>This is the representative sample of the fragment of the Markdown code using the extended syntax for passing auto-numbering option. This is a tag which should come as a first paragraph of the document:</p>
+<pre><code>[](=numbering                {
+    &quot;pattern&quot;: [
+        { &quot;start&quot;: 1 },
+        { &quot;prefix&quot;: &quot;Chapter &quot;, &quot;start&quot;: 1 },
+        { },
+        { &quot;start&quot;: 1, &quot;separator&quot;: &quot;.&quot;, &quot;standAlong&quot;: true },
+        { &quot;suffix&quot;: &quot;) &quot;, &quot;start&quot;: &quot;a&quot;, &quot;separator&quot;:&quot;.&quot;, &quot;standAlong&quot;:true }
+    ],
+    &quot;defaultPrefix&quot;: &quot;&quot;,
+    &quot;defaultSuffix&quot;: &quot;. &quot;,
+    &quot;defaultStart&quot;: 1,
+    &quot;defaultSeparator&quot;: &quot;.&quot;
+}=)
+
+</code></pre>
+<p>First of all, all options come on two levels: general for the entire document (named <code>default*</code>) and per heading level, described in the property <code>pattern</code>. The exclusion is the option <code>standAlong</code> which appears only in <code>patter</code> and is only defined for individual heading levels.</p>
+<p>By default, a heading number is shown as a multi-component string including number of upper-level headings, such as in “2.11.3”. The option <code>standAlong</code> is used to disable upper-level part, showing, in this example, just “3”.</p>
+<table>
+<thead>
+<tr>
+<th>Property Name</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>prefix<br/>defaultPrefix</td>
+<td><code>&quot;&quot;</code></td>
+<td>String which comes before number. Typical used include &quot;Chapter &quot;, &quot;Part &quot;</td>
+</tr>
+<tr>
+<td>suffix<br/>defaultSuffix</td>
+<td><code>&quot;. &quot;</code></td>
+<td>String which comes after number. It is used to separate number and heading caption</td>
+</tr>
+<tr>
+<td>start<br/>defaultStart</td>
+<td>1</td>
+<td>Starting number in each numbered section. It can be any integer number, any string parsable to an integer number or any character.</td>
+</tr>
+<tr>
+<td>separator<br/>defaultSeparator</td>
+<td>1</td>
+<td>Starting number in each numbered section. It can be any integer number, any string parsable to an integer number or any character.</td>
+</tr>
+<tr>
+<td>standAlong</td>
+<td><code>undefined</code></td>
+<td>“Stand along” flag defining that for some individual levels of headings, the components of number inherited from upper-level headings are not shown</td>
+</tr>
+</tbody>
+</table>
+<h3 id="heading.default-auto-numbering20structure" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined">Default Auto-Numbering Structure</h3>
+<pre><code>    autoNumbering: {
+        &quot;pattern&quot;: [],
+        &quot;defaultSuffix&quot;: &quot;. &quot;,
+        &quot;defaultPrefix&quot;: &quot;&quot;,
+        &quot;defaultStart&quot;: 1,
+        &quot;defaultSeparator&quot;: &quot;.&quot;
+    },
+</code></pre>
+
+
+</body>
+</html>
