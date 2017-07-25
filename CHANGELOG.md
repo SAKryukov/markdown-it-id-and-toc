@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 3.0.1
+
+* Fixed a bug in 3.0.0: failed second run of rendering without reloading; the handlers were set again
+
 ## Version 3.0.0
 
 * Added user-configurable auto-numbering
