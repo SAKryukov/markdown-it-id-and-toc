@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 3.5.0
+
+* Improved handling of the case of invalid JSON in the in-doc auto-numbering specifications
+
 ## Version 3.4.0
 
 * Regression issue fix: arrays in user options are not overridden by default, first of all, `includeLevel` used in TOC
