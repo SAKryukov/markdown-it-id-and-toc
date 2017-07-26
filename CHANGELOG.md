@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 3.2.0
+
+* Many improvements related to default options, handling the options and defaults, handling of the errors in the in-document option tag
+
 ## Version 3.0.3
 
 * Fixed a bug with second run of embedded markdown-it plugin: TOC was not updated

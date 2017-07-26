@@ -29,17 +29,18 @@ This is just a self-explaining sample
 ```
     enableHeadingId: true,
     autoNumbering: {
-        pattern: [
-            { start: 1 },
-            { prefix: "Part ", start: 1 },
-            {},
-            { start: 1, separator: '-', standAlong: true },
-            { separator: '.' }
-        ],
-        defaultPrefix: '',
-        defaultSuffix: ". ",
-        defaultStart: 1,
-        defaultSeparator: '.',
+        "enable": false,
+        "defaultStart": "1",
+        "defaultPrefix": "",
+        "defaultSuffix": ". ",
+        "defaultSeparator": ".",
+        "pattern": [
+                {},
+                { "prefix": "Chapter " },
+                {},
+                { "standAlong": true },
+                { "start": "a", "suffix": ") ", "standAlong": true }
+        ]
     },
     autoNumberingRegex: "\\[\\]\\(\\=numbering([\\s\\S]*?)\\=\\)",
     includeLevel: [2, 4, 5, 6],
@@ -58,16 +59,17 @@ Example of auto-numbering options defined as a first paragraph in the document:
 
 ```
 [](=numbering                {
+    "enable": false,
+    "defaultSuffix": ". ",
+    "defaultPrefix": "",
+    "defaultStart": 1,
+    "defaultSeparator": ".",
     "pattern": [
         { "start": 1 },
         { "prefix": "Chapter ", "start": 1 },
         { },
         { "start": 1, "separator": ".", "standAlong": true },
         { "suffix": ") ", "start": "a", "separator":".", "standAlong":true }
-    ],
-    "defaultSuffix": ". ",
-    "defaultPrefix": "",
-    "defaultStart": 1,
-    "defaultSeparator": "."
+    ]
 }=)
 ```
