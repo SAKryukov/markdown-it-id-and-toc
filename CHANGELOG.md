@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 3.3.0
+
+* New major feature: heading number iterates not only by numbers or letters, but also by array of "numbers", such as ["One", "Two", "Three"]
+
 ## Version 3.2.0
 
 * Many improvements related to default options, handling the options and defaults, handling of the errors in the in-document option tag

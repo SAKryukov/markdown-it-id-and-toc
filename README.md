@@ -28,22 +28,16 @@ For detailed description, please see the plugin [documentation](https://sakryuko
 This is just a self-explaining sample
 ```
     enableHeadingId: true,
+    autoNumberingRegex: "^\\[\\]\\(\\=numbering([\\s\\S]*?)\\=\\)",
     autoNumbering: {
         "enable": false,
-        "defaultStart": "1",
-        "defaultPrefix": "",
+        "pattern": [],
         "defaultSuffix": ". ",
-        "defaultSeparator": ".",
-        "pattern": [
-                {},
-                { "prefix": "Chapter " },
-                {},
-                { "standAlong": true },
-                { "start": "a", "suffix": ") ", "standAlong": true }
-        ]
+        "defaultPrefix": "",
+        "defaultStart": 1,
+        "defaultSeparator": "."
     },
-    autoNumberingRegex: "\\[\\]\\(\\=numbering([\\s\\S]*?)\\=\\)",
-    includeLevel: [2, 4, 5, 6],
+    includeLevel: [1, 2, 3, 4, 5, 6],
     tocContainerClass: "toc",
     tocRegex: "^\\[\\]\\(toc\\)",
     excludeFromTocRegex: "\\[\\]\\(notoc\\)",
@@ -51,25 +45,21 @@ This is just a self-explaining sample
     listElements: ["ul", "ul", "ul", "ul", "ul", "ul"],
     defaultListElementAttributeSet: { style: "list-style-type: none;" },
     listElementAttributeSets: [],
-    idPrefix: "headings.",
-    format: undefined
+    idPrefix: "headings."
 ```
 
 Example of auto-numbering options defined as a first paragraph in the document:
 
 ```
-[](=numbering                {
-    "enable": false,
+[](=numbering {
+    "enable": true,
     "defaultSuffix": ". ",
-    "defaultPrefix": "",
-    "defaultStart": 1,
-    "defaultSeparator": ".",
     "pattern": [
-        { "start": 1 },
-        { "prefix": "Chapter ", "start": 1 },
-        { },
-        { "start": 1, "separator": ".", "standAlong": true },
-        { "suffix": ") ", "start": "a", "separator":".", "standAlong":true }
+        {},
+        { "prefix": "Chapter ", "start": ["One", "Two", "Three", "Four"], "suffix": ": " },
+        {},
+        { "standAlong": true },
+        { "start": "a", "suffix": ") ", "standAlong": true }
     ]
 }=)
 ```
