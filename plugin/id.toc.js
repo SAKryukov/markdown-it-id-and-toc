@@ -11,7 +11,7 @@ const defaultOptions = {
         "defaultStart": 1,
         "defaultSeparator": "."
     },
-    includeLevel: [2, 4, 5, 6],
+    includeLevel: [1, 2, 3, 4, 5, 6],
     tocContainerClass: "toc",
     tocRegex: "^\\[\\]\\(toc\\)",
     excludeFromTocRegex: "\\[\\]\\(notoc\\)",
@@ -56,7 +56,7 @@ module.exports = function (md, options) {
             if (!match) return;
             if (!match.length) return;
             if (match.length < 2) return;
-            let privilegedOptions = JSON.parse(match[1]); 
+            let privilegedOptions = JSON.parse(match[1]);
             populateWithDefault(privilegedOptions, options.autoNumbering);
             options.autoNumbering = privilegedOptions;
         } catch (ex) {
@@ -126,15 +126,6 @@ module.exports = function (md, options) {
 
     function headingLevel(token) { return token.tag && parseInt(token.tag.substr(1, 1)); }
 
-    function nextNumber(number) { // number is a letter of a number as string or numeric
-        let tryNumeric = parseInt(number);
-        if (isNaN(tryNumeric)) {
-            let codePoint = number.codePointAt();
-            return String.fromCodePoint(++codePoint);
-        } else
-            return (++tryNumeric).toString();
-    } //nextNumber    
-
     function autoNumbering() {
         function getOption(optionSet, level, property, defaultValue) {
             if (!defaultValue) defaultValue = '';
@@ -194,12 +185,12 @@ module.exports = function (md, options) {
             if (excludeFromToc) return '';
             const level = headingLevel(token);
             if (!autoSet.levels[level])
-                autoSet.levels[level] = { number: autoSet.getStart(level) };
+                autoSet.levels[level] = { number: new Iterator(autoSet.getStart(level)) };
             if (level > autoSet.level) {
-                autoSet.levels[level].number = autoSet.getStart(level);
+                autoSet.levels[level].number = new Iterator(autoSet.getStart(level));
                 autoSet.levels[level].accumulator = autoSet.getAccumulator(level);
             } else
-                autoSet.levels[level].number = nextNumber(autoSet.levels[level].number);
+                autoSet.levels[level].number = autoSet.levels[level].number.next();
             const result = autoSet.getNumberingText(level);
             const prefix = autoSet.getPrefix(level);
             const suffix = autoSet.getSuffix(level);
@@ -352,6 +343,32 @@ module.exports = function (md, options) {
         return util.format("<%s%s>%s</%s>", listTag, elementAttributes, headings.join(""), listTag);
     } //listElement
 
+    function Iterator(first) {
+        if (first.constructor == Array) this.array = first;
+        this.counter = this.array ? 0 : first;
+        Iterator.prototype.toString = function () {
+            return this.array ?
+                this.array[this.counter].toString() : this.counter.toString()
+        }; // toString
+        Iterator.prototype.next = function () {
+            if (this.array)
+                if (!this.array[this.counter + 1]) {
+                    this.counter = this.array[this.array.length - 1];
+                    delete this.array;
+                } else
+                    this.counter++;
+            if (!this.array) { // again, because it could have changed by delete this.array 
+                let tryNumeric = parseInt(this.counter);
+                if (isNaN(tryNumeric)) {
+                    let codePoint = this.counter.codePointAt();
+                    this.counter = String.fromCodePoint(++codePoint);
+                } else
+                    this.counter = (++tryNumeric).toString();
+            } //if
+            return this;
+        } //next
+    } //Iterator
+
     function populateWithDefault(value, defaultValue) {
         const constants = { objectType: typeof {} };
         if (!defaultValue) return;
@@ -365,5 +382,5 @@ module.exports = function (md, options) {
         } else
             value = defaultValue;
     } //populateWithDefault
-    
+
 }; //module.exports
