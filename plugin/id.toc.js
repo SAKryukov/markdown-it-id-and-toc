@@ -157,10 +157,14 @@ module.exports = function (md, options) {
             let title = tokens[index + 1].children.reduce(function (accumulator, child) {
                 return accumulator + child.content;
             }, "");
-            const headingSlug = idSet[idCounts.headings].id;
-            tokens[index].attrs.push(["id", headingSlug]);
-            const prefix = idSet[idCounts.headings].prefix;
-            ++idCounts.headings;
+            // some not-so-pathological cases create redundant md.renderer.rules.heading_open call, so:
+            let prefix = '';
+            if (idSet[idCounts.headings]) {
+                const headingSlug = idSet[idCounts.headings].id;
+                tokens[index].attrs.push(["id", headingSlug]);
+                prefix = idSet[idCounts.headings].prefix;
+                ++idCounts.headings;
+            } //if
             if (headingOpenPrevious)
                 return headingOpenPrevious.apply(this, arguments) + prefix;
             else
