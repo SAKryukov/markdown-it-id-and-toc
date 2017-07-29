@@ -5,6 +5,7 @@ const util = require("util");
 const defaultKeyword = "default";
 const enableKeyword = "enable";
 const trueKeyword = "true";
+const standAlongKeyword = "standAlong";
 const properties = [
     "Suffix",
     "Prefix",
@@ -23,6 +24,7 @@ const headingKeywords = (function (properties) {
     const result = [];
     for (const property of properties)
         result.push(property.toLowerCase());
+    result.push(standAlongKeyword);    
     return result;
 })(properties);
 
@@ -47,6 +49,8 @@ const splitRegex = (function() {
 
 function parsePropertyValue(text) {
     text = text.trim();
+    if (text.toLowerCase() == trueKeyword)
+        return true;
     const length = text.length;
     if (length < 1) return;
     const number = parseInt(text);
@@ -87,11 +91,7 @@ function parse(text) {
             if (topLevelMatch.length != 3) continue;
             const propertyName = topLevelMatch[1];
             const propertyValue = topLevelMatch[2];
-            if (propertyName == enableKeyword) {
-                if (propertyValue.toLowerCase() == trueKeyword)
-                    result[propertyName] = true;
-            } else
-                result[propertyName] = parsePropertyValue(propertyValue);
+            result[propertyName] = parsePropertyValue(propertyValue);
         } //if
     } //loop
     return result;
