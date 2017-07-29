@@ -45,6 +45,26 @@ const splitRegex = (function() {
     return new RegExp("[\n\r]");
 })();
 
+function parsePropertyValue(text) {
+    text = text.trim();
+    const length = text.length;
+    if (length < 1) return;
+    const number = parseInt(text);
+    if (!isNaN(number)) return number;
+    if (length < 3) return;
+    const bra = text[0];
+    const slice = text.slice(1, length - 1);
+    const ket = text[text.length - 1];
+    if (bra == "[" && ket == "]")
+        try {
+            return JSON.parse(bra + slice + ket);
+        } catch (ex) {
+            return;
+        } //exception
+    else if (bra == "\"" && ket == "\"")
+        return slice;
+} //parsePropertyValue
+
 function parse(text) {
     const result = {
         pattern: []
@@ -57,21 +77,21 @@ function parse(text) {
             if (headingMatch.length != 4) continue;
             const level = parseInt(headingMatch[1]);
             const propertyName = headingMatch[2];
-            const propertyValue = headingMatch[3].trim();
+            const propertyValue = headingMatch[3];
             if (!result.pattern[level - 1])
                 result.pattern[level - 1] = {};
-            result.pattern[level - 1][propertyName] = propertyValue;
+            result.pattern[level - 1][propertyName] = parsePropertyValue(propertyValue);
         } else {
             const topLevelMatch = topLevelRegexp.exec(line);
             if (!topLevelMatch) continue;
             if (topLevelMatch.length != 3) continue;
             const propertyName = topLevelMatch[1];
-            const propertyValue = topLevelMatch[2].trim();
+            const propertyValue = topLevelMatch[2];
             if (propertyName == enableKeyword) {
                 if (propertyValue.toLowerCase() == trueKeyword)
                     result[propertyName] = true;
             } else
-                result[propertyName] = propertyValue;
+                result[propertyName] = parsePropertyValue(propertyValue);
         } //if
     } //loop
     return result;
