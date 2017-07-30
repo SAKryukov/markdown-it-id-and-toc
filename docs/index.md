@@ -101,3 +101,46 @@ By default, a heading number is shown as a multi-component string including numb
         "defaultSeparator": "."
     },
 ```
+
+### Simplified Auto-Numbering Options Format
+
+Version 3.6.0 SA??? introduces alternative format for auto-numbering version. The format used previously is JSON; it still can be used, but it is not very suitable for human input and is not fault-tolerant. Presently, it takes precedence. If JSON parsing fails, new parser tried to parse the content of the `[](= ... =)` tag using new grammar:
+
+* Each property is placed on a separate line
+* Leading and trailing blank spaces and spaced between syntactic elements are ignored
+* Line syntax: `<property>: <value>`
+* Document properties:
+    - enabled: true
+    - defaultStart: `<value>`
+    - defaultSeparator: `<value>`
+    - defaultPrefix: `<value>`
+    - defaultSuffix: `<value>`
+* Heading level properties:
+    - h`<level>`.standAlong: true
+    - h`<level>`.start: `<value>`
+    - h`<level>`.separator: `<value>`
+    - h`<level>`.prefix: `<value>`
+    - h`<level>`.suffix: `<value>`
+    here, `<level>` values 1, 2, ... correspond to Markdown headings `#`, `##`, ... or HTML elements `h1`, `h2`, ...
+* Valid values for .start, defaultStart:
+    - integer number
+    - string (in this case, only first character is used)
+    - array of strings
+
+If a line fails to parse, it is ignored. It can be used for comments.
+
+Example of auto-numbering option in-document specifications:
+```
+[](=numbering {
+    enable: true
+    defaultSuffix: 1". "
+    h2.prefix: "Chapter "
+    h2.start: ["One", "Two", "Three", "Four"]
+    h2.suffix: ": "
+    h5.standAlong: true
+    h4.standAlong: true
+    h5.start: "a"
+    h5.suffix: ") "
+}=)
+```
+

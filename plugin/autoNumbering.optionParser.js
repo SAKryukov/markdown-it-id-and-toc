@@ -28,9 +28,6 @@ const headingKeywords = (function (properties) {
     return result;
 })(properties);
 
-//console.log(defaultKeywords);
-//console.log(headingKeywords);
-
 const headingRegexp = (function(headingKeywords) {
     const keywordSet = headingKeywords.join("|");
     const expression = util.format("\b*h([1-6])\.(%s)\b*:\b*(.*)", keywordSet);
@@ -39,7 +36,7 @@ const headingRegexp = (function(headingKeywords) {
 
 const topLevelRegexp = (function(defaultKeywords, enableKeyword) {
     const keywordSet = [defaultKeywords.join("|"), enableKeyword].join("|");
-    const expression = util.format("\b*(%s)\b*:\b*(.*)", keywordSet);
+    const expression = util.format("\b*?(%s)\b*:\b*(.*)", keywordSet);
     return new RegExp(expression);
 })(defaultKeywords, enableKeyword);
 
@@ -69,11 +66,18 @@ function parsePropertyValue(text) {
         return slice;
 } //parsePropertyValue
 
+function isLegitimateParsingResult(result) {
+    if (result && result.parsedPropertyCount && result.parsedHeadingPropertyCount)
+        return (result.parsedPropertyCount + result.parsedHeadingPropertyCount) > 0;
+} //isLegitimateParsingResult
+
 function parse(text) {
     const result = {
         pattern: []
     };
     const lines = text.split(splitRegex);
+    result.parsedPropertyCount = 0;
+    result.parsedHeadingPropertyCount = 0;
     for (const line of lines) {
         if (line.length < 1) continue;
         const headingMatch = headingRegexp.exec(line);
@@ -84,19 +88,28 @@ function parse(text) {
             const propertyValue = headingMatch[3];
             if (!result.pattern[level - 1])
                 result.pattern[level - 1] = {};
-            result.pattern[level - 1][propertyName] = parsePropertyValue(propertyValue);
+            const parsedPropertyValue = parsePropertyValue(propertyValue);
+            if (parsedPropertyValue)
+                ++result.parsedHeadingPropertyCount;
+            result.pattern[level - 1][propertyName] = parsedPropertyValue;
         } else {
             const topLevelMatch = topLevelRegexp.exec(line);
             if (!topLevelMatch) continue;
             if (topLevelMatch.length != 3) continue;
             const propertyName = topLevelMatch[1];
             const propertyValue = topLevelMatch[2];
-            result[propertyName] = parsePropertyValue(propertyValue);
+            const parsedPropertyValue = parsePropertyValue(propertyValue);
+            if (parsedPropertyValue)
+                ++result.parsedPropertyCount;
+            result[propertyName] = parsedPropertyValue;
         } //if
     } //loop
     return result;
 } //parse
 
 module.exports = function (optionText) {
-    return parse(optionText);
+    let result = parse(optionText);
+    if (!isLegitimateParsingResult(result))
+        result = undefined;
+    return result;
 }; //module.exports

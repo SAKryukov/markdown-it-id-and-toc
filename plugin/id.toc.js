@@ -63,10 +63,17 @@ module.exports = function (md, options) {
             options.autoNumbering = privilegedOptions;
         } catch (ex) {
             // alternative:
-            let privilegedOptions = autoNumberingParser(match[1]);
-            populateWithDefault(privilegedOptions, options.autoNumbering);
-            options.autoNumbering = privilegedOptions;
-            return;
+            let privilegedOptions;
+            try {
+                privilegedOptions = autoNumberingParser(match[1]);
+                if (privilegedOptions) {
+                    populateWithDefault(privilegedOptions, options.autoNumbering);
+                    options.autoNumbering = privilegedOptions;
+                    return;
+                } // else let exception go
+            } catch (newFormatException) {
+                // continue with JSON
+            }
             // end alternative
             failedJsonParse = true;
             const errorString = ex.toString();
