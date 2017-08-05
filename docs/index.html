@@ -24,9 +24,9 @@
 <p><a href="https://www.SAKryukov.org"><em>Sergey A Kryukov</em></a></p>
 <p>The <a href="https://www.npmjs.com/package/markdown-it">“markdown-it”</a> plugin <a href="https://www.npmjs.com/package/markdown-it-id-and-toc">markdown-it-id-and-toc</a> adds <code>id</code> attributes to the headings and Table of Contents (TOC) with optional feature-rich user-configurable auto-numbering.</p>
 <p>The decision to implement these features in the same plugin package leads to guaranteed referential integrity of the document and uniqueness of <code>id</code> values.</p>
-<h2 id="heading.contents5b5d28notoc29" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined">Contents</h2>
-<p><div class="toc"><ul style="list-style-type: none;"><li><a href="#heading.features">Features</a></li><li><a href="#heading.options">Options</a></li><li><a href="#heading.auto-numbering-options">Auto-Numbering Options</a><ul style="list-style-type: none;"><li><a href="#heading.default-auto-numbering20structure">Default Auto-Numbering Structure</a></li></ul></li></ul></div></p>
-<h2 id="heading.features" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined">Features</h2>
+<h2 id="heading.contents">Contents</h2>
+<p><div class="toc"><ul style="list-style-type: none;"><li><a href="#heading.features">Features</a></li><li><a href="#heading.options">Options</a></li><li><a href="#heading.auto-numbering-options">Auto-Numbering Options</a><ul style="list-style-type: none;"><li><a href="#heading.default-auto-numbering20structure">Default Auto-Numbering Structure</a></li><li><a href="#heading.simplified-auto-numbering20options20format">Simplified Auto-Numbering Options Format</a></li></ul></li></ul></div></p>
+<h2 id="heading.features">Features</h2>
 <ul>
 <li>Proven uniqueness if <code>id</code> values and identity of <code>id</code> values in headings and TOC</li>
 <li>Tagging for both TOC and “exclude from TOC” headings, user-configurable syntax</li>
@@ -37,7 +37,7 @@
 <li>Customizable sets of attributes for HTML list elements (not only CSS classes), global or individual for each TOC level</li>
 <li>Customizable CSS class of TOC’s parent <code>div</code> element</li>
 </ul>
-<h2 id="heading.options" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined">Options</h2>
+<h2 id="heading.options">Options</h2>
 <table>
 <thead>
 <tr>
@@ -125,7 +125,7 @@
     idPrefix: &quot;headings.&quot;
 }
 </code></pre>
-<h2 id="heading.auto-numbering-options" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined">Auto-Numbering Options</h2>
+<h2 id="heading.auto-numbering-options">Auto-Numbering Options</h2>
 <p>Auto-numbering structure could be defined in two ways: at the level of plugin options, through the option “<a href="#heading.options">autoNumbering</a>”, or at the level of the document. The document-level settings take precedence.</p>
 <p>This is the representative sample of the fragment of the Markdown code using the extended syntax for passing auto-numbering option. This is a tag which should come as a first paragraph of the document:</p>
 <pre><code>[](=numbering                {
@@ -181,7 +181,7 @@
 </tr>
 </tbody>
 </table>
-<h3 id="heading.default-auto-numbering20structure" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined" id="undefined">Default Auto-Numbering Structure</h3>
+<h3 id="heading.default-auto-numbering20structure">Default Auto-Numbering Structure</h3>
 <pre><code>    autoNumbering: {
         &quot;pattern&quot;: [],
         &quot;defaultSuffix&quot;: &quot;. &quot;,
@@ -189,6 +189,53 @@
         &quot;defaultStart&quot;: 1,
         &quot;defaultSeparator&quot;: &quot;.&quot;
     },
+</code></pre>
+<h3 id="heading.simplified-auto-numbering20options20format">Simplified Auto-Numbering Options Format</h3>
+<p>Version 3.6.1 introduces alternative format for auto-numbering version. The format used previously is JSON; it still can be used, but it is not very suitable for human input and is not fault-tolerant. Presently, it takes precedence. If JSON parsing fails, new parser tried to parse the content of the <code>[](= ... =)</code> tag using new grammar:</p>
+<ul>
+<li>Each property is placed on a separate line</li>
+<li>Leading and trailing blank spaces and spaced between syntactic elements are ignored</li>
+<li>Line syntax: <code>&lt;property&gt;: &lt;value&gt;</code></li>
+<li>Document properties:
+<ul>
+<li>enabled: true</li>
+<li>defaultStart: <code>&lt;value&gt;</code></li>
+<li>defaultSeparator: <code>&lt;value&gt;</code></li>
+<li>defaultPrefix: <code>&lt;value&gt;</code></li>
+<li>defaultSuffix: <code>&lt;value&gt;</code></li>
+</ul>
+</li>
+<li>Heading level properties:
+<ul>
+<li>h<code>&lt;level&gt;</code>.standAlong: true</li>
+<li>h<code>&lt;level&gt;</code>.start: <code>&lt;value&gt;</code></li>
+<li>h<code>&lt;level&gt;</code>.separator: <code>&lt;value&gt;</code></li>
+<li>h<code>&lt;level&gt;</code>.prefix: <code>&lt;value&gt;</code></li>
+<li>h<code>&lt;level&gt;</code>.suffix: <code>&lt;value&gt;</code><br />
+here, <code>&lt;level&gt;</code> values 1, 2, … correspond to Markdown headings <code>#</code>, <code>##</code>, … or HTML elements <code>h1</code>, <code>h2</code>, …</li>
+</ul>
+</li>
+<li>Valid values for .start, defaultStart:
+<ul>
+<li>integer number</li>
+<li>string (in this case, only first character is used)</li>
+<li>array of strings</li>
+</ul>
+</li>
+</ul>
+<p>If a line fails to parse, it is ignored. It can be used for comments.</p>
+<p>Example of auto-numbering option in-document specifications:</p>
+<pre><code>[](=numbering {
+    enable: true
+    defaultSuffix: 1&quot;. &quot;
+    h2.prefix: &quot;Chapter &quot;
+    h2.start: [&quot;One&quot;, &quot;Two&quot;, &quot;Three&quot;, &quot;Four&quot;]
+    h2.suffix: &quot;: &quot;
+    h5.standAlong: true
+    h4.standAlong: true
+    h5.start: &quot;a&quot;
+    h5.suffix: &quot;) &quot;
+}=)
 </code></pre>
 
 

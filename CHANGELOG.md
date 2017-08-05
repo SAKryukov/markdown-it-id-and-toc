@@ -6,7 +6,7 @@
 
 ## Version 3.6.0
 
-* Introduced new format for in-document auto-numbering options
+* Introduced simplified new format for in-document auto-numbering options
 
 ## Version 3.5.1
 

@@ -104,7 +104,7 @@ By default, a heading number is shown as a multi-component string including numb
 
 ### Simplified Auto-Numbering Options Format
 
-Version 3.6.0 SA??? introduces alternative format for auto-numbering version. The format used previously is JSON; it still can be used, but it is not very suitable for human input and is not fault-tolerant. Presently, it takes precedence. If JSON parsing fails, new parser tried to parse the content of the `[](= ... =)` tag using new grammar:
+Version 3.6.1 introduces alternative format for auto-numbering version. The format used previously is JSON; it still can be used, but it is not very suitable for human input and is not fault-tolerant. Presently, it takes precedence. If JSON parsing fails, new parser tried to parse the content of the `[](= ... =)` tag using new grammar:
 
 * Each property is placed on a separate line
 * Leading and trailing blank spaces and spaced between syntactic elements are ignored
