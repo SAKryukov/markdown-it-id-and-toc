@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 3.6.0
+
+* Introduced new format for in-document auto-numbering options
+
 ## Version 3.5.1
 
 * Fixed a long-hunted bug: markdown-it failure in some valid but less usual use cases, such as: paragraph in next line after heading, HTML comment before heading, end-of file at the end line of a paragraph following some heading
