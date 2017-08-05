@@ -52,14 +52,14 @@ Example of auto-numbering options defined as a first paragraph in the document:
 
 ```
 [](=numbering {
-    "enable": true,
-    "defaultSuffix": ". ",
-    "pattern": [
-        {},
-        { "prefix": "Chapter ", "start": ["One", "Two", "Three", "Four"], "suffix": ": " },
-        {},
-        { "standAlong": true },
-        { "start": "a", "suffix": ") ", "standAlong": true }
-    ]
+    enable: true
+    defaultSuffix: 1". "
+    h2.prefix: "Chapter "
+    h2.start: ["One", "Two", "Three", "Four"]
+    h2.suffix: ": "
+    h5.standAlong: true
+    h4.standAlong: true
+    h5.start: "a"
+    h5.suffix: ") "
 }=)
 ```
