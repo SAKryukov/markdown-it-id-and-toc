@@ -30,13 +30,13 @@ const headingKeywords = (function (properties) {
 
 const headingRegexp = (function(headingKeywords) {
     const keywordSet = headingKeywords.join("|");
-    const expression = util.format("\b*h([1-6])\.(%s)\b*:\b*(.*)", keywordSet);
+    const expression = util.format("^[ |\t]*h([1-6])\.(%s)[ |\t]*:[ |\t]*(.*)", keywordSet);
     return new RegExp(expression);
 })(headingKeywords);
 
 const topLevelRegexp = (function(defaultKeywords, enableKeyword) {
     const keywordSet = [defaultKeywords.join("|"), enableKeyword].join("|");
-    const expression = util.format("\b*?(%s)\b*:\b*(.*)", keywordSet);
+    const expression = util.format("^[ |\t]*?(%s)[ |\t]*:[ |\t]*(.*)", keywordSet);
     return new RegExp(expression);
 })(defaultKeywords, enableKeyword);
 
