@@ -67,8 +67,7 @@ function parsePropertyValue(text) {
 } //parsePropertyValue
 
 function isLegitimateParsingResult(result) {
-    if (result && result.parsedPropertyCount && result.parsedHeadingPropertyCount)
-        return (result.parsedPropertyCount + result.parsedHeadingPropertyCount) > 0;
+    return (result.parsedPropertyCount + result.parsedHeadingPropertyCount) > 0;
 } //isLegitimateParsingResult
 
 function parse(text) {
