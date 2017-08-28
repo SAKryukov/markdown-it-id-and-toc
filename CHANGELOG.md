@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 3.6.2
+
+* Improved slugify, now all blank spaces are rendered as '-'
+
 ## Version 3.6.1
 
 * Fixed a bug in handling of new format for in-document auto-numbering options; just one option should be legitimate
